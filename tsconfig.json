@@ -1,4 +1,14 @@
 {
-  "extends": "@workspace/typescript-config/base.json"
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@repo/ui/*": ["./packages/ui/src/*"],
+      "@repo/db/*": ["./packages/db/*"],
+      "@repo/auth/*": ["./packages/auth/*"],
+      "@repo/types/*": ["./packages/types/*"]
+    },
+  }
 }
 

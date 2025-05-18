@@ -1,12 +1,15 @@
-import { Button } from "@workspace/ui/components/button"
+// import SignInButton from "@/components/sign-button";
+import { Button } from "@repo/ui/components/button";
+import Link from "next/link";
 
-export default function Page() {
+export default async function Page() {
+ 
+
   return (
     <div className="flex items-center justify-center min-h-svh">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Hello World</h1>
-        <Button size="sm">Button</Button>
-      </div>
+       <h1>Hello world</h1>
+       <Link href="/sign-up">Sing up page</Link>
+       {/* <SignInButton/> */}
     </div>
-  )
+  );
 }

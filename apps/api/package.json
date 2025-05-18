@@ -1,0 +1,46 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    "import": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsup --watch src/index.ts --onSuccess \"nodemon dist/index.js\"",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "santosh-marar",
+  "license": "ISC",
+  "packageManager": "pnpm@10.4.1",
+  "dependencies": {
+    "@repo/db": "workspace:*",
+    "@repo/types": "workspace:*",
+    "better-auth": "^1.2.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.0",
+    "rimraf": "^6.0.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.1",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20",
+    "@types/winston": "^2.4.4",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  }
+}
