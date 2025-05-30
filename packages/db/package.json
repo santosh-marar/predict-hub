@@ -12,6 +12,7 @@
     "dist"
   ],
   "scripts": {
+    "dev": "tsc --watch",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
@@ -30,7 +31,8 @@
     "drizzle-orm": "^0.43.1",
     "drizzle-zod": "^0.7.1",
     "postgres": "^3.4.5",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@types/node": "^20",

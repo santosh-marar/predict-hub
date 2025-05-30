@@ -1,0 +1,105 @@
+import {
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  integer,
+  decimal,
+  boolean,
+  uuid,
+  index,
+  foreignKey,
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { user } from "./auth";
+import { category } from "./category";
+import { position } from "./position";
+import { trade } from "./trade";
+import { comment } from "./comment";    
+import { order } from "./order";
+
+
+
+export const event = pgTable(
+  "event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    description: text("description"),
+    imageUrl: text("image_url"),
+    categoryId: integer("category_id").references(() => category.id),
+    createdBy: uuid("created_by")
+      .references(() => user.id)
+      .notNull(),
+
+    // Event timing
+    startTime: timestamp("start_time"),
+    endTime: timestamp("end_time").notNull(),
+    resolutionTime: timestamp("resolution_time"),
+
+    // Event status
+    status: text("status", {
+      enum: ["draft", "active", "ended", "resolved", "cancelled"],
+    })
+      .default("draft")
+      .notNull(),
+
+    // Trading mechanics
+    totalVolume: decimal("total_volume", { precision: 15, scale: 2 })
+      .default("0")
+      .notNull(),
+    totalYesShares: decimal("total_yes_shares", { precision: 15, scale: 2 })
+      .default("0")
+      .notNull(),
+    totalNoShares: decimal("total_no_shares", { precision: 15, scale: 2 })
+      .default("0")
+      .notNull(),
+
+    // Current prices (0-100)
+    yesPrice: decimal("yes_price", { precision: 5, scale: 2 })
+      .default("50")
+      .notNull(),
+    noPrice: decimal("no_price", { precision: 5, scale: 2 })
+      .default("50")
+      .notNull(),
+
+    // Resolution
+    resolvedOutcome: boolean("resolved_outcome"), // true for YES, false for NO, null for unresolved
+    resolvedBy: uuid("resolved_by").references(() => user.id),
+    resolvedAt: timestamp("resolved_at"),
+    resolutionNotes: text("resolution_notes"),
+
+    // Metadata
+    tags: text("tags").array(),
+    isPublic: boolean("is_public").default(true).notNull(),
+    isFeatured: boolean("is_featured").default(false).notNull(),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    categoryIdx: index("events_category_idx").on(table.categoryId),
+    statusIdx: index("events_status_idx").on(table.status),
+    endTimeIdx: index("events_end_time_idx").on(table.endTime),
+    createdByIdx: index("events_created_by_idx").on(table.createdBy),
+  })
+);
+
+export const eventRelation = relations(event, ({ one, many }) => ({
+  category: one(category, {
+    fields: [event.categoryId],
+    references: [category.id],
+  }),
+  creator: one(user, {
+    fields: [event.createdBy],
+    references: [user.id],
+  }),
+  resolver: one(user, {
+    fields: [event.resolvedBy],
+    references: [user.id],
+  }),
+  position: many(position),
+  trade: many(trade),
+  comment: many(comment),
+  order: many(order),
+}));

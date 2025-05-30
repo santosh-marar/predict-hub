@@ -1,0 +1,105 @@
+import { user } from "./auth";
+import { event } from "./event";
+import { uuid, text, timestamp, decimal, index, pgTable } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { trade } from "./trade";
+
+export const order = pgTable(
+  "order",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => user.id)
+      .notNull(),
+    eventId: uuid("event_id")
+      .references(() => event.id)
+      .notNull(),
+
+    // Order details
+    side: text("side", { enum: ["yes", "no"] }).notNull(),
+    type: text("type", { enum: ["buy", "sell"] }).notNull(),
+    orderType: text("order_type", { enum: ["market", "limit"] })
+      .default("limit")
+      .notNull(),
+
+    // Quantities
+    originalQuantity: decimal("original_quantity", {
+      precision: 15,
+      scale: 2,
+    }).notNull(),
+    remainingQuantity: decimal("remaining_quantity", {
+      precision: 15,
+      scale: 2,
+    }).notNull(),
+    filledQuantity: decimal("filled_quantity", { precision: 15, scale: 2 })
+      .default("0")
+      .notNull(),
+
+    // Pricing
+    limitPrice: decimal("limit_price", { precision: 5, scale: 2 }), // null for market orders
+    averageFillPrice: decimal("average_fill_price", { precision: 5, scale: 2 }),
+
+    // Status and timing
+    status: text("status", {
+      enum: ["pending", "partial", "filled", "cancelled", "expired"],
+    })
+      .default("pending")
+      .notNull(),
+    timeInForce: text("time_in_force", { enum: ["GTC", "IOC", "FOK"] })
+      .default("GTC")
+      .notNull(), // Good Till Cancel, Immediate or Cancel, Fill or Kill
+    expiresAt: timestamp("expires_at"),
+
+    // Execution tracking
+    totalAmount: decimal("total_amount", { precision: 15, scale: 2 }).notNull(),
+    fees: decimal("fees", { precision: 15, scale: 2 }).default("0").notNull(),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    filledAt: timestamp("filled_at"),
+    cancelledAt: timestamp("cancelled_at"),
+  },
+  (table) => ({
+    userIdx: index("orders_user_idx").on(table.userId),
+    eventIdx: index("orders_event_idx").on(table.eventId),
+    statusIdx: index("orders_status_idx").on(table.status),
+    // Critical index for order matching
+    eventSideTypePrice: index("orders_matching_idx").on(
+      table.eventId,
+      table.side,
+      table.type,
+      table.limitPrice,
+      table.createdAt
+    ),
+    createdAtIdx: index("orders_created_at_idx").on(table.createdAt),
+  })
+);
+
+export const orderRelation = relations(order, ({ one, many }) => ({
+  user: one(user, {
+    fields: [order.userId],
+    references: [user.id],
+  }),
+  event: one(event, {
+    fields: [order.eventId],
+    references: [event.id],
+  }),
+  makerTrade: many(trade, { relationName: "makerTrade" }),
+  takerTrade: many(trade, { relationName: "takerTrade" }),
+}));
+
+// import { z } from "zod";
+
+// // Types and Schemas
+// export const CreateOrderSchema = z.object({
+//   userId: z.string().uuid(),
+//   eventId: z.string().uuid(),
+//   side: z.enum(["yes", "no"]),
+//   type: z.enum(["buy", "sell"]),
+//   orderType: z.enum(["market", "limit"]),
+//   quantity: z.number().positive(),
+//   limitPrice: z.number().min(0).max(100).optional(),
+//   timeInForce: z.enum(["GTC", "IOC", "FOK"]).default("GTC"),
+// });
+
+// export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;

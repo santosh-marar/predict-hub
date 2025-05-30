@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -5,6 +6,14 @@ import {
   boolean,
   integer,
 } from "drizzle-orm/pg-core";
+import { event } from "./event";
+import { position } from "./position";
+import { trade } from "./trade";
+import { wallet } from "./wallet";
+import { transaction } from "./transaction";
+import { comment } from "./comment";
+import { notification } from "./notification";
+import { order } from "./order";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -60,3 +69,22 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 });
+
+export const jwks = pgTable("jwks", {
+  id: text("id").primaryKey(),
+  publicKey: text("public_key").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
+
+export const userRelation = relations(user, ({ many, one }) => ({
+  event: many(event),
+  position: many(position),
+  trade: many(trade),
+  wallet: one(wallet),
+  transaction: many(transaction),
+  comment: many(comment),
+  notification: many(notification),
+  order: many(order),
+}));
