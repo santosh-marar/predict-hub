@@ -9,7 +9,7 @@ const SignInButton: React.FC = () => {
     try {
       await signIn.social({
         provider: "google", // Change to your desired provider
-        callbackURL: "/dashboard", // Redirect after successful sign-in
+        callbackURL: "/profile", // Redirect after successful sign-in
         errorCallbackURL: "/error", // Redirect after failed sign-in
       });
     } catch (error) {

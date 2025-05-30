@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
 import { TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 const categories = [
   "All events",
@@ -114,63 +115,97 @@ const quickEvents = [
   { name: "BMPS", icon: "🎮", bg: "bg-purple-500", category: "Gaming" },
 ];
 
+const featuredStories = [
+  {
+    title: "Messi's Magic Again?",
+    description: "Lionel Messi dazzles with another stunning free kick goal!",
+  },
+  {
+    title: "Crypto Market Booms",
+    description:
+      "Bitcoin and Ethereum hit new monthly highs amid investor optimism.",
+  },
+  {
+    title: "Probo Event Insights",
+    description: "Learn how Probo markets work with latest event examples.",
+  },
+];
+
 export default function EventsSection() {
   const [activeCategory, setActiveCategory] = useState("All events");
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
 
+  // Filter quickEvents according to active category (or show all if 'All events')
+  const filteredQuickEvents =
+    activeCategory === "All events"
+      ? quickEvents
+      : quickEvents.filter((event) => event.category === activeCategory);
+
+  // Reset currentEventIndex if it is out of bounds after filtering
+  useEffect(() => {
+    if (currentEventIndex >= filteredQuickEvents.length) {
+      setCurrentEventIndex(0);
+    }
+  }, [activeCategory, filteredQuickEvents.length, currentEventIndex]);
+
+  // Filter events according to active category (or all)
   const filteredEvents =
     activeCategory === "All events"
       ? events
       : events.filter((event) => event.category === activeCategory);
 
   const nextEvent = () => {
-    setCurrentEventIndex((prev) => (prev + 1) % quickEvents.length);
+    setCurrentEventIndex((prev) => (prev + 1) % filteredQuickEvents.length);
   };
 
   const prevEvent = () => {
     setCurrentEventIndex(
-      (prev) => (prev - 1 + quickEvents.length) % quickEvents.length
+      (prev) =>
+        (prev - 1 + filteredQuickEvents.length) % filteredQuickEvents.length
     );
   };
 
   return (
-    <section className="bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="bg-gray-100 pb-12">
+      <div>
         {/* Category Filter */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-0 mb-6 border-b border-gray-200">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className={`px-4 py-3 text-sm font-medium transition-colors duration-200 relative border-b-2 ${
-                  activeCategory === category
-                    ? "bg-[#262626] text-white border-[#262626]"
-                    : "text-gray-600 hover:text-black border-transparent"
-                }`}
-                onClick={() => setActiveCategory(category)}
-              >
-                {category}
-              </button>
-            ))}
+        <div className="mb-8 border-gray-200">
+          <div className="flex flex-wrap gap-0 border-b">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  className={`px-4 pt-6 pb-1 text-sm font-medium transition-colors duration-200 relative border-b-2 ${
+                    activeCategory === category
+                      ? "text-[#262626] border-b border-[#262626]"
+                      : "text-gray-600 hover:text-black border-transparent"
+                  }`}
+                  onClick={() => setActiveCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Quick Events Carousel */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mt-6 overflow-x-auto no-scrollbar border-none mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Button
               variant="ghost"
               size="sm"
               onClick={prevEvent}
+              disabled={filteredQuickEvents.length <= 1}
               className="hover:bg-gray-200"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <div className="flex gap-3 overflow-hidden">
-              {quickEvents
+            <div className="flex gap-3 min-w-[0] overflow-hidden flex-1">
+              {filteredQuickEvents
                 .slice(currentEventIndex, currentEventIndex + 7)
                 .map((event, index) => (
                   <button
                     key={index}
-                    className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 min-w-fit hover:bg-gray-50 transition-colors duration-150 border border-gray-200"
+                    className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 min-w-fit hover:bg-gray-50 transition-colors duration-150  border-gray-200"
                     onClick={() => setActiveCategory(event.category)}
                   >
                     <div
@@ -188,6 +223,7 @@ export default function EventsSection() {
               variant="ghost"
               size="sm"
               onClick={nextEvent}
+              disabled={filteredQuickEvents.length <= 1}
               className="hover:bg-gray-200"
             >
               <ChevronRight className="w-4 h-4" />
@@ -195,62 +231,70 @@ export default function EventsSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Events Grid */}
           <div className="lg:col-span-3">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-xl font-semibold text-[#262626] mb-6 border-b">
               {activeCategory}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filteredEvents.map((event) => (
                 <Card
                   key={event.id}
-                  className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200"
+                  className="bg-white border-0 shadow-none py-0"
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-start gap-4 mb-4">
-                      <div
-                        className={`w-12 h-12 ${event.iconBg} rounded-lg flex items-center justify-center text-white text-xl`}
-                      >
-                        {event.icon}
+                    <div className="flex flex-col items-start gap-4 mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Image
+                          src="/Bar_Chart.avif"
+                          alt="chart"
+                          width={20}
+                          height={20}
+                        />
+                        <span className="text-sm text-gray-600 font-medium">
+                          {event.traders.toLocaleString()} traders
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <TrendingUp className="w-4 h-4 text-red-500" />
-                          <span className="text-sm text-gray-600 font-medium">
-                            {event.traders.toLocaleString()} traders
-                          </span>
+                      <div className="flex gap-4">
+                        <div
+                          className={`w-16 h-16 ${event.iconBg} rounded-lg flex items-center justify-center text-white text-xl`}
+                        >
+                          {event.icon}
                         </div>
-                        <h3 className="font-semibold text-gray-900 mb-2 leading-tight">
-                          {event.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-semibold text-[#262626] mb-1">
+                            {event.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-600">
                           {event.description}
                         </p>
-                        <a
-                          href="#"
-                          className="text-blue-600 text-sm hover:underline"
-                        >
-                          Read more
-                        </a>
                       </div>
                     </div>
-                    <div className="flex gap-3">
-                      <Button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white">
-                        Yes {event.yesPrice}
-                      </Button>
-                      <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white">
-                        No {event.noPrice}
-                      </Button>
+                    <div className="flex gap-4 text-sm font-medium">
+                      <button className="flex-1 bg-[#e8f2ff] text-[#197bff] rounded-md py-2">
+                        Yes @ {event.yesPrice}
+                      </button>
+                      <button className="flex-1 bg-[#fdf3f2] text-[#dc2804] rounded-md py-2  transition">
+                        No @ {event.noPrice}
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+              {filteredEvents.length === 0 && (
+                <p className="text-center text-gray-500 col-span-full">
+                  No events found in this category.
+                </p>
+              )}
             </div>
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 hidden lg:block">
             {/* Download App Card */}
             <Card className="bg-gradient-to-br from-gray-900 to-gray-800 text-white border-0">
               <CardContent className="p-6 text-center">
@@ -271,19 +315,19 @@ export default function EventsSection() {
             {/* Featured Stories */}
             <div>
               <h3 className="font-bold text-gray-900 mb-4">Featured Stories</h3>
-              <Card className="bg-white border-0 shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center text-white text-sm">
-                      🏏
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Cricket</h4>
-                      <p className="text-sm text-gray-600">May 26th 2025</p>
-                    </div>
+              <div className="space-y-4">
+                {featuredStories.map((story, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-200"
+                  >
+                    <h4 className="font-semibold text-gray-800 mb-1">
+                      {story.title}
+                    </h4>
+                    <p className="text-sm text-gray-600">{story.description}</p>
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
             </div>
           </div>
         </div>

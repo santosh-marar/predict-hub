@@ -8,7 +8,7 @@
     "import": "./dist/index.js"
   },
   "scripts": {
-    "dev": "tsup --watch src/index.ts --onSuccess \"nodemon dist/index.js\"",
+    "dev": "tsx watch src/index.ts",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
@@ -41,6 +41,7 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsup": "^8.4.0",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }
 }

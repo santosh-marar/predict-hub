@@ -1,4 +1,4 @@
-import { createAuthClient } from "better-auth/client";
+import { createAuthClient } from "better-auth/react";
 import { adminClient } from "better-auth/client/plugins";
 
 // Create a type for the auth client
@@ -17,7 +17,10 @@ export const {
 }: {
   // @ts-ignore
   signIn,
+  
   // @ts-ignore
   signUp,
-  useSession: BetterAuthClient["useSession"];
+
+  // @ts-ignore
+  useSession,
 } = authClient;

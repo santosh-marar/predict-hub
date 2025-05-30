@@ -25,7 +25,7 @@ export default function SignUp() {
           password,
           name,
           image,
-          callbackURL: "/dashboard", // Or wherever you want to redirect after verify
+          callbackURL: "/profile", // Or wherever you want to redirect after verify
         },
         {
           onSuccess: () => {

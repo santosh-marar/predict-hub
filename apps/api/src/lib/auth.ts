@@ -13,6 +13,7 @@ export const auth = betterAuth({
       verification,
     },
   }),
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:8080",
   emailAndPassword: {
     enabled: true,
   },
@@ -26,15 +27,23 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
-  trustedOrigins: ["http://localhost:3000"],
+  trustedOrigins: ["http://localhost:3000", "http://localhost:8080"],
   plugins: [
     admin({
       defaultRole: "user",
       adminRole: ["admin", "super_admin"],
       defaultBanReason: "Spamming",
-      impersonationSessionDuration: 60 * 60 * 24 * 7, // 7 days
+      impersonationSessionDuration: 60 * 60 * 24 * 7,
     }),
   ],
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+    // cookieCache: {
+    //   enabled: true,
+    //   maxAge: 60 * 60 * 24 * 7,
+    // },
+  },
   account: {
     accountLinking: {
       enabled: true,

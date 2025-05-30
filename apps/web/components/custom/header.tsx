@@ -14,7 +14,7 @@ export default function Header() {
       try {
         await signIn.social({
           provider: "google", 
-          callbackURL: "/dashboard", 
+          callbackURL: "http://localhost:3000/profile",
           errorCallbackURL: "/error", 
         });
       } catch (error) {
@@ -23,7 +23,7 @@ export default function Header() {
     };
 
   return (
-    <header className="w-full bg-white">
+    <header className="w-full bg-[#f5f5f5]">
       <div className="max-w-7xl mx-auto ">
         <div className="flex items-center justify-between px-6 py-4 px-6 py-4 border-b border-gray-200">
           {/* Logo */}

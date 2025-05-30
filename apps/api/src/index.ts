@@ -7,6 +7,7 @@ import morgan from "morgan";
 import { toNodeHandler } from "better-auth/node";
 import adminRoutes from "./routes/admin";
 import { auth } from "./lib/auth";
+import userRoutes from "./routes/user";
 
 const app: Application = express();
 const PORT = process.env.PORT || 8080;
@@ -14,10 +15,10 @@ const PORT = process.env.PORT || 8080;
 // Configure CORS middleware
 app.use(
   cors({
-    origin: true, // Allow all origins (Better Auth will handle specific origin validation)
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    credentials: true,
   })
 );
 
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/user", userRoutes);
 
 // Start
 app.listen(PORT, () => {

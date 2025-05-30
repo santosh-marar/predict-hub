@@ -4,6 +4,7 @@ import "@repo/ui/globals.css"
 import { Providers } from "@/components/providers"
 import Header from "@/components/custom/header"
 import Footer from "@/components/custom/footer"
+import { ReactQueryProvider } from "./provider/query-provider";
 
 const fontSans = Work_Sans({
   subsets: ["latin"],
@@ -17,13 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} font-sans antialiased `}
-      >
+      <body className={`${fontSans.variable} font-sans antialiased `}>
         <Providers>
-          <Header/>
-          {children}
-          <Footer/>
+          <ReactQueryProvider>
+            <Header />
+            {children}
+            <Footer />
+          </ReactQueryProvider>
         </Providers>
       </body>
     </html>
