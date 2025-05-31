@@ -8,8 +8,6 @@ import { useSession } from "@/lib/auth-client";
 export default function EventsPage() {
   const { data, error, isPending } = useSession();
 
-  console.log("session", data);
-
   const fetchUsers = async () => {
     try {
       const response = await fetch("http://localhost:8080/api/v1/user/users", {

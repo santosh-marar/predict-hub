@@ -16,9 +16,8 @@ import { category } from "./category";
 import { position } from "./position";
 import { trade } from "./trade";
 import { comment } from "./comment";    
-import { order } from "./order";
-
-
+import { order } from "./order";  
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 
 export const event = pgTable(
   "event",
@@ -84,6 +83,10 @@ export const event = pgTable(
     createdByIdx: index("events_created_by_idx").on(table.createdBy),
   })
 );
+
+export const eventSelectSchema = createSelectSchema(event);
+export const eventInsertSchema = createInsertSchema(event);
+export const eventUpdateSchema= createUpdateSchema(event)
 
 export const eventRelation = relations(event, ({ one, many }) => ({
   category: one(category, {

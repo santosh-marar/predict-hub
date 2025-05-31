@@ -15,7 +15,6 @@ export default function VideoPlayer() {
     };
 
     const handleCanPlay = () => {
-      console.log("Video can play");
     };
 
     // Add event listeners

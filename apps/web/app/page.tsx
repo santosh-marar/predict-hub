@@ -9,20 +9,23 @@ import CTASection from "@/components/custom/cta-section";
 
 export default async function Page() {
 
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("better-auth.session_token");
+  // const cookieStore = await cookies();
+  // const sessionCookie = cookieStore.get("better-auth.session_token");
 
-  const response = await fetch("http://localhost:8080/api/v1/user/users", {
-    headers: {
-      Cookie: cookieStore.toString(), // Forward all cookies
-      // OR just the session cookie:
-      // 'Cookie': `better-auth.session_token=${sessionCookie?.value}`,
-      "Content-Type": "application/json",
-    },
-  });
+  // const response = await fetch(
+  //   "http://localhost:8080/api/v1/user/profile/ebzl5rm9FWhI13rFkJGLL1jF3QuSQRcu",
+  //   {
+  //     headers: {
+  //       Cookie: cookieStore.toString(), // Forward all cookies
+  //       // OR just the session cookie:
+  //       // 'Cookie': `better-auth.session_token=${sessionCookie?.value}`,
+  //       "Content-Type": "application/json",
+  //     },
+  //   }
+  // );
 
-  const data = await response.json();
-  console.log("data", data);
+  // const data = await response.json();
+  // console.log("data", data);
 
   return (
     <>

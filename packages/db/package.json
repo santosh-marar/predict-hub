@@ -12,7 +12,6 @@
     "dist"
   ],
   "scripts": {
-    "dev": "tsc --watch",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",

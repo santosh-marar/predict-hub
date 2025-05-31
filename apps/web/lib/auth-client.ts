@@ -14,6 +14,7 @@ export const {
   signIn,
   signUp,
   useSession,
+  signOut,
 }: {
   // @ts-ignore
   signIn,
@@ -23,4 +24,8 @@ export const {
 
   // @ts-ignore
   useSession,
+
+  // @ts-ignore
+  signOut,
+
 } = authClient;
