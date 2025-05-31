@@ -1,22 +1,227 @@
 import { Request, Response } from "express";
-import { authenticate, requireAdmin } from "../middleware/auth";
-import asyncMiddleware from "src/middleware/asyc-middleware";
-import { db, user } from "@repo/db";
-import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "src/lib/auth";
+import asyncMiddleware from "src/middleware/async-middleware";
+import {
+  db,
+  event,
+  notification,
+  position,
+  transaction,
+  user,
+  wallet,
+} from "@repo/db";
+import { eq, desc, sql, and } from "drizzle-orm";
+import { AuthRequest } from "src/middleware/auth";
 
-// export const getUser = async (req: Request, res: Response) => {
-//   const { user } = req;
+export const getProfile = asyncMiddleware(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id!;
 
-//   if (!user) {
-//     return res.status(401).json({ error: "Unauthorized" });
-//   }
+    const userProfile = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
 
-//   return res.json({ user });
-// };
+    if (!userProfile.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-export const getUsers = asyncMiddleware(async (req: Request, res: Response) => {
-  const allUsers = await db.select().from(user);
+    const userWallet = await db
+      .select()
+      .from(wallet)
+      .where(eq(wallet.userId, userId))
+      .limit(1);
 
-  return res.status(200).json({ users: allUsers, message: "Users retrieved" });
-});
+    const stats = await db
+      .select({
+        totalPositions: sql`count(${position.id})`,
+        totalVolume: sql`sum(${position.totalInvested})`,
+        totalPnl: sql`sum(${position.realizedPnl} + ${position.unrealizedPnl})`,
+      })
+      .from(position)
+      .where(eq(position.userId, userId));
+
+    res.json({
+      user: userProfile[0],
+      wallet: userWallet[0] || null,
+      stats: stats[0],
+    });
+  }
+);
+
+export const updateProfile = asyncMiddleware(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id!;
+    const { name, image } = req.body;
+
+    const updatedUser = await db
+      .update(user)
+      .set({
+        name,
+        image,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, userId))
+      .returning();
+
+    if (!updatedUser.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ user: updatedUser[0] });
+  }
+);
+
+export const getPositions = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id!;
+  const { status, limit = "50", offset = "0" } = req.query;
+
+  // Build where conditions array
+  const whereConditions = [eq(position.userId, userId)];
+
+  // Add status filter if provided and valid
+  if (status && typeof status === "string") {
+    const validStatuses = [
+      "draft",
+      "active",
+      "ended",
+      "resolved",
+      "cancelled",
+    ] as const;
+    if (validStatuses.includes(status as any)) {
+      whereConditions.push(
+        eq(event.status, status as (typeof validStatuses)[number])
+      );
+    }
+  }
+
+  // Build the query with all conditions at once
+  const query = db
+    .select({
+      position: position,
+      event: {
+        id: event.id,
+        title: event.title,
+        status: event.status,
+        yesPrice: event.yesPrice,
+        noPrice: event.noPrice,
+        endTime: event.endTime,
+      },
+    })
+    .from(position)
+    .leftJoin(event, eq(position.eventId, event.id))
+    .where(and(...whereConditions))
+    .orderBy(desc(position.updatedAt))
+    .limit(parseInt(limit as string))
+    .offset(parseInt(offset as string));
+
+  const positions = await query;
+
+  res.json({ positions });
+};
+
+export const getTransactions = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id!;
+    const { type, limit = "50", offset = "0" } = req.query;
+
+    // Build where conditions array
+    const whereConditions = [eq(transaction.userId, userId)];
+
+    // Add type filter if provided and valid
+    if (type && typeof type === "string") {
+      const validTypes = [
+        "trade",
+        "deposit",
+        "withdrawal",
+        "payout",
+        "refund",
+        "bonus",
+      ] as const;
+      if (validTypes.includes(type as any)) {
+        whereConditions.push(
+          eq(transaction.type, type as (typeof validTypes)[number])
+        );
+      }
+    }
+
+    // Build the query with all conditions at once
+    const transactions = await db
+      .select()
+      .from(transaction)
+      .where(and(...whereConditions))
+      .orderBy(desc(transaction.createdAt))
+      .limit(parseInt(limit as string))
+      .offset(parseInt(offset as string));
+
+    res.json({ transactions });
+  } catch (error) {
+    console.error("Get transactions error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getNotifications = asyncMiddleware(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id!;
+    const { unreadOnly = "false", limit = "50", offset = "0" } = req.query;
+
+    // Build where conditions array
+    const whereConditions = [eq(notification.userId, userId)];
+
+    if (unreadOnly === "true") {
+      whereConditions.push(eq(notification.isRead, false));
+    }
+
+    const notifications = await db
+      .select()
+      .from(notification)
+      .where(and(...whereConditions))
+      .orderBy(desc(notification.createdAt))
+      .limit(parseInt(limit as string))
+      .offset(parseInt(offset as string));
+
+    res.json({ notifications });
+  }
+);
+
+export const markNotificationsRead = asyncMiddleware(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id!;
+    const { notificationIds } = req.body;
+
+    await db
+      .update(notification)
+      .set({
+        isRead: true,
+        readAt: new Date(),
+      })
+      .where(
+        sql`${notification.userId} = ${userId} AND ${notification.id} = ANY(${notificationIds})`
+      );
+
+    res.json({ success: true });
+  }
+);
+
+export const getLeaderboardPosition = asyncMiddleware(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id!;
+
+    const leaderboard = await db
+      .select({
+        userId: wallet.userId,
+        totalPnl: wallet.totalPnl,
+        rank: sql`ROW_NUMBER() OVER (ORDER BY ${wallet.totalPnl} DESC)`,
+      })
+      .from(wallet)
+      .orderBy(desc(wallet.totalPnl));
+
+    const userPosition = leaderboard.find((entry) => entry.userId === userId);
+
+    res.json({
+      position: userPosition ? parseInt(userPosition.rank as string) : null,
+      totalPnl: userPosition ? userPosition.totalPnl : "0",
+    });
+  }
+);

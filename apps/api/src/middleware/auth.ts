@@ -1,10 +1,10 @@
 import { fromNodeHeaders } from "better-auth/node";
 import { Request, Response, NextFunction } from "express";
-// import { Role } from "@repo/types";
 import { auth } from "src/lib/auth";
+import { SessionUser } from "@repo/types";
 
 export interface AuthRequest extends Request {
-  user?: any;
+  user?: SessionUser;
 }
 
 export enum Role {
@@ -59,24 +59,24 @@ export const requireRole = (role: Role) => {
 };
 
 // Multiple roles middleware
-export const requireAnyRole = (roles: Role[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
+// export const requireAnyRole = (roles: Role[]) => {
+//   return (req: AuthRequest, res: Response, next: NextFunction): void => {
+//     if (!req.user) {
+//       res.status(401).json({ error: "Unauthorized" });
+//       return;
+//     }
 
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({
-        error: "Forbidden",
-        message: `Required one of roles: ${roles.join(", ")}`,
-      });
-      return;
-    }
+//     if (!roles.includes(req.user.role as string)) {
+//       res.status(403).json({
+//         error: "Forbidden",
+//         message: `Required one of roles: ${roles.join(", ")}`,
+//       });
+//       return;
+//     }
 
-    next();
-  };
-};
+//     next();
+//   };
+// };
 
 // Admin only middleware
 export const requireAdmin = requireRole(Role.ADMIN);
