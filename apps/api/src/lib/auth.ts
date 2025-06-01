@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { account, db, session, user, verification } from "@repo/db";
 import { admin } from "better-auth/plugins";
+import { createWallet } from "@controllers/wallet";
+import { APIError } from "better-auth/api";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -23,6 +25,7 @@ export const auth = betterAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     },
     google: {
+      prompt: "select_account",
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
@@ -48,6 +51,23 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ["google", "github", "email-password"],
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user, ctx) => {},
+        after: async (user, ctx) => {
+          try {
+            await createWallet(user.id);
+            console.log(`Wallet created for user: ${user.id}`);
+          } catch (error) {
+            throw new APIError("BAD_REQUEST", {
+              message: "Failed to create wallet",
+            });
+          }
+        },
+      },
     },
   },
 });

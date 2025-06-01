@@ -6,6 +6,7 @@ import {
   pgTable,
   index,
 } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { user } from "./auth";
 import { order } from "./order";
 import { event } from "./event";
@@ -16,7 +17,7 @@ export const transaction = pgTable(
   "transaction",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .references(() => user.id)
       .notNull(),
 
@@ -62,6 +63,10 @@ export const transaction = pgTable(
     createdAtIdx: index("transactions_created_at_idx").on(table.createdAt),
   })
 );
+
+export const transactionSelectSchema = createSelectSchema(transaction);
+export const transactionInsertSchema = createInsertSchema(transaction);
+export const transactionUpdateSchema= createUpdateSchema(transaction);
 
 export const transactionRelation = relations(transaction, ({ one }) => ({
   user: one(user, {

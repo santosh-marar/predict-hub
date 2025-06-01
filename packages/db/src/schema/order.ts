@@ -2,13 +2,18 @@ import { user } from "./auth";
 import { event } from "./event";
 import { uuid, text, timestamp, decimal, index, pgTable } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import { trade } from "./trade";
 
 export const order = pgTable(
   "order",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .references(() => user.id)
       .notNull(),
     eventId: uuid("event_id")
@@ -75,6 +80,10 @@ export const order = pgTable(
   })
 );
 
+export const orderSelectSchema = createSelectSchema(order);
+export const orderInsertSchema = createInsertSchema(order); 
+export const orderUpdateSchema= createUpdateSchema(order);
+
 export const orderRelation = relations(order, ({ one, many }) => ({
   user: one(user, {
     fields: [order.userId],
@@ -87,19 +96,3 @@ export const orderRelation = relations(order, ({ one, many }) => ({
   makerTrade: many(trade, { relationName: "makerTrade" }),
   takerTrade: many(trade, { relationName: "takerTrade" }),
 }));
-
-// import { z } from "zod";
-
-// // Types and Schemas
-// export const CreateOrderSchema = z.object({
-//   userId: z.string().uuid(),
-//   eventId: z.string().uuid(),
-//   side: z.enum(["yes", "no"]),
-//   type: z.enum(["buy", "sell"]),
-//   orderType: z.enum(["market", "limit"]),
-//   quantity: z.number().positive(),
-//   limitPrice: z.number().min(0).max(100).optional(),
-//   timeInForce: z.enum(["GTC", "IOC", "FOK"]).default("GTC"),
-// });
-
-// export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;

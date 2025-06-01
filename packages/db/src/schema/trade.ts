@@ -19,10 +19,10 @@ export const trade = pgTable(
     takerOrderId: uuid("taker_order_id")
       .references(() => order.id)
       .notNull(),
-    makerUserId: uuid("maker_user_id")
+    makerUserId: text("maker_user_id")
       .references(() => user.id)
       .notNull(),
-    takerUserId: uuid("taker_user_id")
+    takerUserId: text("taker_user_id")
       .references(() => user.id)
       .notNull(),
 

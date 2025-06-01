@@ -1,11 +1,10 @@
 import { relations } from "drizzle-orm";
+import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-  integer,
-} from "drizzle-orm/pg-core";
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import { event } from "./event";
 import { position } from "./position";
 import { trade } from "./trade";
@@ -28,6 +27,10 @@ export const user = pgTable("user", {
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
 });
+
+export const userSelectSchema = createSelectSchema(user);
+export const userInsertSchema = createInsertSchema(user);
+export const userUpdateSchema = createUpdateSchema(user);
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -69,14 +72,6 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 });
-
-export const jwks = pgTable("jwks", {
-  id: text("id").primaryKey(),
-  publicKey: text("public_key").notNull(),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
-});
-
 
 export const userRelation = relations(user, ({ many, one }) => ({
   event: many(event),

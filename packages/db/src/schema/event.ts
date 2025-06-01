@@ -26,8 +26,8 @@ export const event = pgTable(
     title: text("title").notNull(),
     description: text("description"),
     imageUrl: text("image_url"),
-    categoryId: integer("category_id").references(() => category.id),
-    createdBy: uuid("created_by")
+    categoryId: uuid("category_id").references(() => category.id),
+    createdBy: text("created_by")
       .references(() => user.id)
       .notNull(),
 
@@ -64,7 +64,7 @@ export const event = pgTable(
 
     // Resolution
     resolvedOutcome: boolean("resolved_outcome"), // true for YES, false for NO, null for unresolved
-    resolvedBy: uuid("resolved_by").references(() => user.id),
+    resolvedBy: text("resolved_by").references(() => user.id),
     resolvedAt: timestamp("resolved_at"),
     resolutionNotes: text("resolution_notes"),
 
@@ -86,7 +86,7 @@ export const event = pgTable(
 
 export const eventSelectSchema = createSelectSchema(event);
 export const eventInsertSchema = createInsertSchema(event);
-export const eventUpdateSchema= createUpdateSchema(event)
+export const eventUpdateSchema= createUpdateSchema(event);
 
 export const eventRelation = relations(event, ({ one, many }) => ({
   category: one(category, {

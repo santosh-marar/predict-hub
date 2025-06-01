@@ -199,13 +199,23 @@ export default function Header() {
             >
               <Link href="#">Download App</Link>
             </Button>
-            <Button className="bg-[#262626] cursor-pointer text-white hover:bg-gray-800 rounded-xs">
-              {pathname === "/" ? (
-                <Link href="/events">Trade Online</Link>
-              ) : (
-                <button onClick={handleSignIn}>Login/Signup</button>
-              )}
-            </Button>
+            {pathname === "/" ? (
+              <Link href="/events" passHref>
+                <Button
+                  asChild
+                  className="bg-[#262626] cursor-pointer text-white hover:bg-gray-800 rounded-xs"
+                >
+                  Trade Online
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                onClick={handleSignIn}
+                className="bg-[#262626] cursor-pointer text-white hover:bg-gray-800 rounded-xs"
+              >
+                Login/Signup
+              </Button>
+            )}
           </div>
         </div>
       </div>

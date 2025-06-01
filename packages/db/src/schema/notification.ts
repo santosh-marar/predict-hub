@@ -4,12 +4,18 @@ import { trade } from "./trade";
 import { comment } from "./comment";
 import { uuid, text, timestamp, boolean, index, pgTable } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
+
 
 export const notification = pgTable(
   "notification",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
 
@@ -41,6 +47,10 @@ export const notification = pgTable(
     typeIdx: index("notifications_type_idx").on(table.type),
   })
 );
+
+export const notificationSelectSchema = createSelectSchema(notification);
+export const notificationInsertSchema = createInsertSchema(notification); 
+export const notificationUpdateSchema= createUpdateSchema(notification);
 
 export const notificationRelation = relations(notification, ({ one }) => ({
   user: one(user, {

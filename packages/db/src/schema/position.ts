@@ -1,13 +1,21 @@
-import {uuid, decimal, timestamp, index, pgTable} from "drizzle-orm/pg-core";
+import {
+  uuid,
+  decimal,
+  timestamp,
+  index,
+  text,
+  pgTable,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { event } from "./event";
-import { user} from "./auth";
+import { user } from "./auth";
 
 export const position = pgTable(
   "position",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
     eventId: uuid("event_id")
@@ -49,6 +57,10 @@ export const position = pgTable(
     eventIdx: index("positions_event_idx").on(table.eventId),
   })
 );
+
+export const positionSelectSchema = createSelectSchema(position);
+export const positionInsertSchema = createInsertSchema(position); 
+export const positionUpdateSchema= createUpdateSchema(position);
 
 export const positionRelation = relations(position, ({ one }) => ({
   user: one(user, {
