@@ -8,35 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@repo/ui/components/dropdown-menu";
-import { ChevronDown} from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { handleSignIn, handleSignOut } from "@/lib/auth-client";
 
 export default function Header() {
   const pathname = usePathname();
   const session = useSession();
   const user = session?.data?.user;
-
-  const handleSignIn = async () => {
-    try {
-      await signIn.social({
-        provider: "google",
-        callbackURL: "http://localhost:3000/events",
-        errorCallbackURL: "/error",
-      });
-    } catch (error) {
-      console.error("Sign-in error:", error);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Sign-out error:", error);
-    }
-  };
 
   if (user) {
     return (
@@ -146,6 +127,11 @@ export default function Header() {
                       Logout
                     </button>
                   </DropdownMenuItem>
+                  {user?.role === "admin" && (
+                    <DropdownMenuItem>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

@@ -7,6 +7,7 @@ import { useSession } from "@/lib/auth-client";
 
 export default function EventsPage() {
   const { data, error, isPending } = useSession();
+  console.log("data", data);
 
   const fetchUsers = async () => {
     try {

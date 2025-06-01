@@ -17,15 +17,34 @@ export const {
   signOut,
 }: {
   // @ts-ignore
-  signIn,
-  
-  // @ts-ignore
-  signUp,
+  signIn;
 
   // @ts-ignore
-  useSession,
+  signUp;
 
   // @ts-ignore
-  signOut,
+  useSession;
 
+  // @ts-ignore
+  signOut;
 } = authClient;
+
+export const handleSignIn = async () => {
+  try {
+    await signIn.social({
+      provider: "google",
+      callbackURL: "http://localhost:3000/events",
+      errorCallbackURL: "/error",
+    });
+  } catch (error) {
+    console.error("Sign-in error:", error);
+  }
+};
+
+export const handleSignOut = async () => {
+  try {
+    await signOut();
+  } catch (error) {
+    console.error("Sign-out error:", error);
+  }
+};
