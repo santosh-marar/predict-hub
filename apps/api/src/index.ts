@@ -8,6 +8,8 @@ import { toNodeHandler } from "better-auth/node";
 import adminRoutes from "./routes/admin";
 import { auth } from "./lib/auth";
 import userRoutes from "./routes/user";
+import categoryRoutes from "./routes/category";
+import subCategoryRoutes from "./routes/sub-category";
 
 const app: Application = express();
 const PORT = process.env.PORT || 8080;
@@ -41,6 +43,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/category", categoryRoutes);
+app.use("/api/v1/sub-category", subCategoryRoutes);
 
 // Start
 app.listen(PORT, () => {

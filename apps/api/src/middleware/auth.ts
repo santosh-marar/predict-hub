@@ -24,6 +24,7 @@ export const authenticate = async (
       headers: fromNodeHeaders(req.headers),
     });
 
+
     if (!session) {
       res.status(401).json({ error: "Unauthorized" });
       return;

@@ -60,7 +60,6 @@ export const auth = betterAuth({
         after: async (user, ctx) => {
           try {
             await createWallet(user.id);
-            console.log(`Wallet created for user: ${user.id}`);
           } catch (error) {
             throw new APIError("BAD_REQUEST", {
               message: "Failed to create wallet",
