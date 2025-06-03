@@ -9,7 +9,7 @@ export const getCategories = asyncMiddleware( async (req: Request, res: Response
     const categories = await db
       .select()
       .from(category)
-      .where(eq(category.isActive, true))
+      // .where(eq(category.isActive, true))
       .orderBy(asc(category.title));
 
     res.json({
@@ -45,7 +45,7 @@ export const getCategoryById = asyncMiddleware(
 
 // Create new category (admin only)
 export const createCategory = asyncMiddleware( async (req: Request, res: Response) => {
-    const { title, description, imageUrl } = req.body;
+    const { title, isActive, description, imageUrl } = req.body;
 
     if (!title) {
       return res.status(400).json({
@@ -63,7 +63,7 @@ export const createCategory = asyncMiddleware( async (req: Request, res: Respons
         slug,
         description,
         imageUrl,
-        isActive: true,
+        isActive
       })
       .returning();
 

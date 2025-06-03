@@ -1,18 +1,15 @@
 import {
   pgTable,
-  serial,
   text,
   timestamp,
-  integer,
   decimal,
   boolean,
   uuid,
   index,
-  foreignKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { user } from "./auth";
-import { category } from "./category";
+import { category, subCategory } from "./category";
 import { position } from "./position";
 import { trade } from "./trade";
 import { comment } from "./comment";    
@@ -27,6 +24,7 @@ export const event = pgTable(
     description: text("description"),
     imageUrl: text("image_url"),
     categoryId: uuid("category_id").references(() => category.id),
+    subCategoryId: uuid("sub_category_id").references(() => subCategory.id),
     createdBy: text("created_by")
       .references(() => user.id)
       .notNull(),
@@ -56,10 +54,10 @@ export const event = pgTable(
 
     // Current prices (0-100)
     yesPrice: decimal("yes_price", { precision: 5, scale: 2 })
-      .default("50")
+      .default("5")
       .notNull(),
     noPrice: decimal("no_price", { precision: 5, scale: 2 })
-      .default("50")
+      .default("5")
       .notNull(),
 
     // Resolution

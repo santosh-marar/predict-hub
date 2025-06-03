@@ -17,6 +17,7 @@ export default function AdminLayout({
         <main className="">
           <DashboardHeader />
           {children}
+
         </main>
       </SidebarInset>
     </SidebarProvider>

@@ -15,6 +15,13 @@
       "when": 1748750804965,
       "tag": "0001_ambitious_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1748877101370,
+      "tag": "0002_clumsy_clint_barton",
+      "breakpoints": true
     }
   ]
 }
