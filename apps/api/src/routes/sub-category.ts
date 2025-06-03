@@ -13,9 +13,9 @@ import { authenticate, requireAdmin } from "src/middleware/auth";
 
 const router = Router();
 
+router.get("/", getAllSubCategories);
+router.get("/:id", getSubCategoryById);
 router.post("/", authenticate, requireAdmin, createSubCategory);
-router.get("/", authenticate, requireAdmin, getAllSubCategories);
-router.get("/:id", authenticate, requireAdmin, getSubCategoryById);
 router.get("/slug/:slug", authenticate, requireAdmin, getSubCategoryBySlug);
 router.get(
   "/category/:categoryId",

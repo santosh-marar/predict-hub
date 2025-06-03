@@ -411,29 +411,12 @@ export const deleteSubCategory = asyncMiddleware(async (req, res) => {
     });
   }
 
-  if (permanent === "true") {
-    // Permanent delete
-    await db.delete(subCategory).where(eq(subCategory.id, id));
+  await db.delete(subCategory).where(eq(subCategory.id, id));
 
-    res.json({
-      success: true,
-      message: "Sub-category permanently deleted",
-    });
-  } else {
-    // Soft delete
-    await db
-      .update(subCategory)
-      .set({
-        isActive: false,
-        updatedAt: new Date(),
-      })
-      .where(eq(subCategory.id, id));
-
-    res.json({
-      success: true,
-      message: "Sub-category deactivated successfully",
-    });
-  }
+  res.json({
+    success: true,
+    message: "Sub-category deleted successfully",
+  });
 });
 
 // Get sub-categories statistics

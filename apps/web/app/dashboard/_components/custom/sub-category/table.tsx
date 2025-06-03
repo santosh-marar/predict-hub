@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable } from "@repo/ui/components/data-table";
-import { categoryColumns } from "./column";
+import { subCategoryColumns } from "./column";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,37 +10,37 @@ import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
 import { AlertCircle } from "lucide-react";
 import { Skeleton } from "@repo/ui/components/skeleton";
 
-export default function CategoriesList() {
+export default function SubCategoriesList() {
   const queryClient = useQueryClient();
 
-  const getCategories = async () => {
-    const response = await api.get("/category");
+  const getSubCategories = async () => {
+    const response = await api.get("/sub-category");
     return response.data;
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["category"],
-    queryFn: getCategories,
+    queryKey: ["sub-category"],
+    queryFn: getSubCategories,
   });
 
-  const categoriesData = data?.data;
+  const subCategoriesData = data?.data;
 
-  // Mutation for deleting a category
-  const deleteCategoryMutation = useMutation({
-    mutationFn: async (categoryId: string) => {
-      await api.delete(`/category/${categoryId}`);
+  // Mutation for deleting a subCategory
+  const deleteSubCategoryMutation = useMutation({
+    mutationFn: async (subCategoryId: string) => {
+      await api.delete(`/sub-category/${subCategoryId}`);
     },
     onSuccess: () => {
-      toast.success("Category deleted");
-      queryClient.invalidateQueries({ queryKey: ["category"] });
+      toast.success("Subcategory deleted");
+      queryClient.invalidateQueries({ queryKey: ["sub-category"] });
     },
     onError: () => {
-      toast.error("Failed to delete category");
+      toast.error("Failed to delete subcategory");
     },
   });
 
-  const handleDelete = (categoryId: string) => {
-    deleteCategoryMutation.mutate(categoryId);
+  const handleDelete = (subCategoryId: string) => {
+    deleteSubCategoryMutation.mutate(subCategoryId);
   };
 
   if (isLoading) {
@@ -67,8 +67,8 @@ export default function CategoriesList() {
   return (
     <div className="container">
       <DataTable
-        columns={categoryColumns(handleDelete)}
-        data={categoriesData}
+        columns={subCategoryColumns(handleDelete)}
+        data={subCategoriesData}
       />
     </div>
   );
