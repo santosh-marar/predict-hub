@@ -5,6 +5,7 @@ import {
   AudioWaveform,
   BookOpen,
   Bot,
+  Calendar,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 
 import { NavMain } from "@/app/dashboard/_components/ui/nav-main";
-import { NavProjects } from "@/app/dashboard/_components/ui/nav-projects";
 import { NavUser } from "@/app/dashboard/_components/ui/nav-user";
 import { TeamSwitcher } from "@/app/dashboard/_components/ui/team-switcher";
 import {
@@ -45,6 +45,21 @@ const data = {
         {
           title: "Overview",
           url: "/dashboard",
+        },
+      ],
+    },
+    {
+      title: "Events",
+      url: "/dashboard/events",
+      icon: Calendar,
+      items: [
+        {
+          title: "Events",
+          url: "/dashboard/events",
+        },
+        {
+          title: "Create event",
+          url: "/dashboard/events/new",
         },
       ],
     },

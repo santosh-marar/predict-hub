@@ -52,7 +52,7 @@ export const event = pgTable(
       .default("0")
       .notNull(),
 
-    // Current prices (0-100)
+    // Current prices (0-10)
     yesPrice: decimal("yes_price", { precision: 5, scale: 2 })
       .default("5")
       .notNull(),
@@ -65,8 +65,11 @@ export const event = pgTable(
     resolvedBy: text("resolved_by").references(() => user.id),
     resolvedAt: timestamp("resolved_at"),
     resolutionNotes: text("resolution_notes"),
+    sourceOfTruth: text("source_of_truth"),
+    rules: text("rules"),
 
     // Metadata
+    eventOverviewAndStatistics: text("event_overview_and_statistics"),
     tags: text("tags").array(),
     isPublic: boolean("is_public").default(true).notNull(),
     isFeatured: boolean("is_featured").default(false).notNull(),

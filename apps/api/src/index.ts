@@ -10,6 +10,7 @@ import { auth } from "./lib/auth";
 import userRoutes from "./routes/user";
 import categoryRoutes from "./routes/category";
 import subCategoryRoutes from "./routes/sub-category";
+import eventRoutes from "./routes/event";
 
 const app: Application = express();
 const PORT = process.env.PORT || 8080;
@@ -45,6 +46,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/sub-category", subCategoryRoutes);
+app.use("/api/v1/event", eventRoutes);
 
 // Start
 app.listen(PORT, () => {
