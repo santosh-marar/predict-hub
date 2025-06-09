@@ -237,7 +237,17 @@ export const getEventById = asyncMiddleware(
 export const updateEvent = asyncMiddleware(
   async (req: AuthRequest, res: Response) => {
     const { id } = eventParamsSchema.parse(req.params);
-    const validatedData = eventUpdateSchema.parse(req.body);
+
+    const rawBody = req.body;
+
+    const parsedData = {
+      ...rawBody,
+      startTime: rawBody.startTime ? new Date(rawBody.startTime) : undefined,
+      endTime: rawBody.endTime ? new Date(rawBody.endTime) : undefined,
+      resolutionTime: rawBody.resolutionTime
+        ? new Date(rawBody.resolutionTime)
+        : undefined,
+    };
 
     const existingEvent = await db
       .select()
@@ -252,7 +262,7 @@ export const updateEvent = asyncMiddleware(
     const updatedEvent = await db
       .update(event)
       .set({
-        ...validatedData,
+        ...parsedData,
         updatedAt: new Date(),
       })
       .where(eq(event.id, id))

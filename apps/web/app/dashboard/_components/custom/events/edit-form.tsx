@@ -36,18 +36,25 @@ import { X, Plus } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 const eventFormSchema = z.object({
+  id: z.string().uuid(),
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
   categoryId: z.string().uuid().optional(),
   subCategoryId: z.string().uuid().optional(),
-  startTime: z.string().optional(),
+  startTime: z.string().optional().or(z.literal("")),
   endTime: z.string().min(1, "End time is required"),
-  resolutionTime: z.string().optional(),
+  resolutionTime: z.string().optional().or(z.literal("")),
   status: z.enum(["draft", "active", "ended", "resolved", "cancelled"]),
+  totalVolume: z.string(),
+  totalYesShares: z.string(),
+  totalNoShares: z.string(),
+  yesPrice: z.string(),
+  noPrice: z.string(),
+  resolvedOutcome: z.boolean().optional(),
+  resolutionNotes: z.string().optional(),
   tags: z.array(z.string()),
   isPublic: z.boolean(),
   isFeatured: z.boolean(),
@@ -56,29 +63,64 @@ const eventFormSchema = z.object({
   eventOverviewAndStatistics: z.string(),
 });
 
-// Infer the type from the schema
 type EventFormData = z.infer<typeof eventFormSchema>;
 
-export function EventForm() {
-  const queryClient = useQueryClient();
-  const router = useRouter();
+interface EventEditFormProps {
+  initialData: any; // Using any to handle the API response format
+}
 
+// Helper function to convert ISO date to datetime-local format
+const formatDateForInput = (dateString: string | null | undefined): string => {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    // Format as YYYY-MM-DDTHH:mm for datetime-local input
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return "";
+  }
+};
+
+export default function EventEditForm({ initialData }: EventEditFormProps) {
   const [newTag, setNewTag] = useState("");
+  const queryClient = useQueryClient();
+
+  // Process the initial data to match form expectations
+  const processedInitialData = {
+    id: initialData.id || "",
+    title: initialData.title || "",
+    description: initialData.description || "",
+    imageUrl: initialData.imageUrl || "",
+    categoryId: initialData.categoryId || undefined,
+    subCategoryId: initialData.subCategoryId || undefined,
+    startTime: formatDateForInput(initialData.startTime),
+    endTime: formatDateForInput(initialData.endTime),
+    resolutionTime: formatDateForInput(initialData.resolutionTime),
+    status: initialData.status || "draft",
+    totalVolume: String(initialData.totalVolume || "0"),
+    totalYesShares: String(initialData.totalYesShares || "0"),
+    totalNoShares: String(initialData.totalNoShares || "0"),
+    yesPrice: String(initialData.yesPrice || "0"),
+    noPrice: String(initialData.noPrice || "0"),
+    resolvedOutcome: initialData.resolvedOutcome || false,
+    resolutionNotes: initialData.resolutionNotes || "",
+    tags: Array.isArray(initialData.tags) ? initialData.tags : [],
+    isPublic: Boolean(initialData.isPublic),
+    isFeatured: Boolean(initialData.isFeatured),
+    sourceOfTruth: initialData.sourceOfTruth || "",
+    rules: initialData.rules || "",
+    eventOverviewAndStatistics: initialData.eventOverviewAndStatistics || "",
+  } as EventFormData;
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      imageUrl: "",
-      status: "draft",
-      tags: [],
-      isPublic: true,
-      isFeatured: false,
-      sourceOfTruth: "",
-      rules: "",
-      eventOverviewAndStatistics: "",
-    },
+    defaultValues: processedInitialData,
   });
 
   const addTag = () => {
@@ -99,13 +141,23 @@ export function EventForm() {
 
   const mutation = useMutation({
     mutationFn: async (data: EventFormData) => {
-      const response = await api.post("/event", data);
+      // const apiData = {
+      //   ...data,
+      //   startTime: data.startTime
+      //     ? new Date(data.startTime).toISOString()
+      //     : null,
+      //   endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
+      //   resolutionTime: data.resolutionTime
+      //     ? new Date(data.resolutionTime).toISOString()
+      //     : null,
+      // };
+
+      const response = await api.put(`/event/${data.id}`, data);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event"] });
-      toast.success(`Event created successfully!`);
-      router.push("/dashboard/events");
+      toast.success(`Event updated successfully!`);
     },
     onError: (error: any) => {
       const message =
@@ -117,22 +169,17 @@ export function EventForm() {
   });
 
   const onSubmit = (data: EventFormData) => {
+    
     mutation.mutate(data);
   };
 
-  // All states available:
   const isLoading = mutation.isPending;
-  const isError = mutation.isError;
-  const isSuccess = mutation.isSuccess;
-  const isIdle = mutation.isIdle;
-  const error = mutation.error;
-  const data = mutation.data;
 
   return (
-    <Card className="max-w-3xl rounded-sm">
+    <Card className="w-full max-w-4xl rounded-sm">
       <CardHeader>
-        <CardTitle>Event Management</CardTitle>
-        <CardDescription>Create prediction market events</CardDescription>
+        <CardTitle>Update Event</CardTitle>
+        <CardDescription>Edit prediction market events</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -274,7 +321,7 @@ export function EventForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tags</FormLabel>
-                    <div className="">
+                    <div className="space-y-2">
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add a tag"
@@ -288,7 +335,7 @@ export function EventForm() {
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
-                      <div className="flex flex-wrap gap-4">
+                      <div className="flex flex-wrap gap-2">
                         {field.value.map((tag, index) => (
                           <Badge
                             key={index}
@@ -355,6 +402,135 @@ export function EventForm() {
               />
             </div>
 
+            {/* Trading Mechanics */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <FormField
+                control={form.control}
+                name="totalVolume"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Volume</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="totalYesShares"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yes Shares</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="totalNoShares"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>No Shares</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="yesPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yes Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="10"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="noPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>No Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="10"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Resolution */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="resolvedOutcome"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Resolved as YES</FormLabel>
+                      <FormDescription>
+                        Check if the event resolved as YES
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="resolutionNotes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Resolution Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Resolution explanation"
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(e.target.value || undefined)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             {/* Settings */}
             <div className="flex gap-6">
               <FormField
@@ -401,7 +577,7 @@ export function EventForm() {
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? "Saving..." : "Save Event"}
+              {isLoading ? "Updating..." : "Update Event"}
             </Button>
           </form>
         </Form>
