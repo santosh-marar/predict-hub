@@ -43,8 +43,8 @@ const eventQuerySchema = z.object({
   status: z
     .enum(["draft", "active", "ended", "resolved", "cancelled"])
     .optional(),
-  categoryId: z.string().uuid().optional(),
-  subCategoryId: z.string().uuid().optional(),
+  categoryId: z.string().optional(),
+  subCategoryId: z.string().optional(),
   createdBy: z.string().optional(),
   search: z.string().optional(),
   isPublic: z.coerce.boolean().optional(),
