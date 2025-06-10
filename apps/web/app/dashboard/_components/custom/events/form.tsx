@@ -33,7 +33,7 @@ import {
 } from "@repo/ui/components/card";
 import { Badge } from "@repo/ui/components/badge";
 import { X, Plus } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -81,6 +81,9 @@ export function EventForm() {
     },
   });
 
+  // Watch category selection for subcategory fetching
+  const selectedCategoryId = form.watch("categoryId");
+
   const addTag = () => {
     if (newTag.trim() && !form.getValues("tags").includes(newTag.trim())) {
       const currentTags = form.getValues("tags");
@@ -95,6 +98,45 @@ export function EventForm() {
       "tags",
       currentTags.filter((tag) => tag !== tagToRemove)
     );
+  };
+
+  // Fetch categories
+  const getCategories = async () => {
+    const response = await api.get("/category");
+    return response.data;
+  };
+
+  const {
+    data: categoriesData,
+    isLoading: isLoadingCategories,
+    error: errorCategories,
+  } = useQuery({
+    queryKey: ["category"],
+    queryFn: getCategories,
+  });
+
+  // Fetch subcategories based on selected category
+  const getSubcategories = async (categoryId: string) => {
+    const response = await api.get(`/sub-category/category/${categoryId}`);
+    return response.data;
+  };
+
+  const {
+    data: subcategoriesData,
+    isLoading: isLoadingSubcategories,
+    error: errorSubcategories,
+  } = useQuery({
+    queryKey: ["subcategories", selectedCategoryId],
+    queryFn: () => getSubcategories(selectedCategoryId!),
+    enabled: !!selectedCategoryId,
+  });
+
+  const categories = categoriesData?.data;
+  const subcategories = subcategoriesData?.data || [];
+
+  const handleCategoryChange = (categoryId: string) => {
+    form.setValue("categoryId", categoryId);
+    form.setValue("subCategoryId", "");
   };
 
   const mutation = useMutation({
@@ -233,6 +275,100 @@ export function EventForm() {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Category and Subcategory Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      onValueChange={handleCategoryChange}
+                      value={field.value}
+                      disabled={isLoadingCategories}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              isLoadingCategories
+                                ? "Loading categories..."
+                                : "Select a category"
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories?.map((category: any) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errorCategories && (
+                      <FormDescription className="text-red-500">
+                        Error loading categories
+                      </FormDescription>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="subCategoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subcategory</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!selectedCategoryId || isLoadingSubcategories}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={
+                              !selectedCategoryId
+                                ? "Select a category first"
+                                : isLoadingSubcategories
+                                  ? "Loading subcategories..."
+                                  : "Select a subcategory"
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {subcategories && subcategories.length > 0 ? (
+                          subcategories.map((subcategory: any) => (
+                            <SelectItem
+                              key={subcategory.id}
+                              value={subcategory.id}
+                            >
+                              {subcategory.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="p-2 text-sm text-muted-foreground">
+                            No subcategories available
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {errorSubcategories && (
+                      <FormDescription className="text-red-500">
+                        Error loading subcategories
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

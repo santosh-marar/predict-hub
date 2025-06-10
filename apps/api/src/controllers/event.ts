@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { db, event, eventInsertSchema, eventUpdateSchema } from "@repo/db";
+import { db, event, eventInsertSchema, eventUpdateSchema, category, subCategory } from "@repo/db";
 import {
   eq,
   and,
@@ -131,7 +131,6 @@ export const createEvent = asyncMiddleware(
   }
 );
 
-
 export const getEvents = asyncMiddleware(
   async (req: Request, res: Response) => {
     const query = eventQuerySchema.parse(req.query);
@@ -176,8 +175,39 @@ export const getEvents = asyncMiddleware(
 
     const [events, totalCount] = await Promise.all([
       db
-        .select()
+        .select({
+          // Explicitly select all event fields
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          status: event.status,
+          categoryId: event.categoryId,
+          subCategoryId: event.subCategoryId,
+          createdBy: event.createdBy,
+          isPublic: event.isPublic,
+          isFeatured: event.isFeatured,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          resolutionTime: event.resolutionTime,
+          totalVolume: event.totalVolume,
+          totalYesShares: event.totalYesShares,
+          totalNoShares: event.totalNoShares,
+          yesPrice: event.yesPrice,
+          noPrice: event.noPrice,
+          resolvedOutcome: event.resolvedOutcome,
+          resolvedBy: event.resolvedBy,
+          resolvedAt: event.resolvedAt,
+          resolutionNotes: event.resolutionNotes,
+          imageUrl: event.imageUrl,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          // Add category and subcategory titles
+          categoryTitle: category.title,
+          subCategoryTitle: subCategory.title,
+        })
         .from(event)
+        .leftJoin(category, eq(event.categoryId, category.id))
+        .leftJoin(subCategory, eq(event.subCategoryId, subCategory.id))
         .where(whereClause)
         .orderBy(orderByClause)
         .limit(limit)
@@ -188,7 +218,18 @@ export const getEvents = asyncMiddleware(
     const totalPages = Math.ceil(totalCount[0].count / limit);
 
     res.json({
-      ...createResponse(events),
+      filter: {
+        status,
+        categoryId,
+        subCategoryId,
+        createdBy,
+        search,
+        isPublic,
+        isFeatured,
+        sortBy,
+        sortOrder,
+      },
+      data: events,
       pagination: {
         page,
         limit,

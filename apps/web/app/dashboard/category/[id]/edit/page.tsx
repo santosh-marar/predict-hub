@@ -19,7 +19,6 @@ export default async function EditCategoryPage(props: {
           Cookie: cookieStore.toString(),
           "Content-Type": "application/json",
         },
-        // Optional: enable revalidation if needed
         cache: "no-store",
       }
     );

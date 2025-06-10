@@ -247,7 +247,7 @@ export const getSubCategoryBySlug = asyncMiddleware(async (req, res) => {
 export const getSubCategoriesByCategoryId = asyncMiddleware(
   async (req, res) => {
     const { categoryId } = req.params;
-    const { isActive = true } = req.query;
+    // const { isActive = true } = req.query;
 
     const result = await db
       .select()
@@ -255,7 +255,7 @@ export const getSubCategoriesByCategoryId = asyncMiddleware(
       .where(
         and(
           eq(subCategory.categoryId, categoryId),
-          eq(subCategory.isActive, isActive === "true")
+          // eq(subCategory.isActive, isActive === "true")
         )
       )
       .orderBy(asc(subCategory.title));

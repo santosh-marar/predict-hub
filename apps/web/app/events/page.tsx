@@ -7,7 +7,6 @@ import { useSession } from "@/lib/auth-client";
 
 export default function EventsPage() {
   const { data, error, isPending } = useSession();
-  console.log("data", data);
 
   const fetchUsers = async () => {
     try {
@@ -32,7 +31,6 @@ export default function EventsPage() {
 
   const fetchUs = async () => {
     const data = await fetchUsers();
-    console.log("data", data);
   };
 
   React.useEffect(() => {

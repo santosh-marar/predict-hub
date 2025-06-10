@@ -36,6 +36,7 @@ import { X, Plus } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { toast } from "sonner";
+import formatDateForInput from "@/lib/format-date";
 
 const eventFormSchema = z.object({
   id: z.string().uuid(),
@@ -68,24 +69,6 @@ type EventFormData = z.infer<typeof eventFormSchema>;
 interface EventEditFormProps {
   initialData: any; // Using any to handle the API response format
 }
-
-// Helper function to convert ISO date to datetime-local format
-const formatDateForInput = (dateString: string | null | undefined): string => {
-  if (!dateString) return "";
-  try {
-    const date = new Date(dateString);
-    // Format as YYYY-MM-DDTHH:mm for datetime-local input
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  } catch (error) {
-    console.error("Date formatting error:", error);
-    return "";
-  }
-};
 
 export default function EventEditForm({ initialData }: EventEditFormProps) {
   const [newTag, setNewTag] = useState("");
@@ -141,16 +124,6 @@ export default function EventEditForm({ initialData }: EventEditFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: EventFormData) => {
-      // const apiData = {
-      //   ...data,
-      //   startTime: data.startTime
-      //     ? new Date(data.startTime).toISOString()
-      //     : null,
-      //   endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
-      //   resolutionTime: data.resolutionTime
-      //     ? new Date(data.resolutionTime).toISOString()
-      //     : null,
-      // };
 
       const response = await api.put(`/event/${data.id}`, data);
       return response.data;
@@ -169,7 +142,6 @@ export default function EventEditForm({ initialData }: EventEditFormProps) {
   });
 
   const onSubmit = (data: EventFormData) => {
-    
     mutation.mutate(data);
   };
 
