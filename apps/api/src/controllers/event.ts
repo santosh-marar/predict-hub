@@ -44,6 +44,7 @@ const eventQuerySchema = z.object({
     .enum(["draft", "active", "ended", "resolved", "cancelled"])
     .optional(),
   categoryId: z.string().optional(),
+  subCategoryTitle: z.string().optional(),
   subCategoryId: z.string().optional(),
   createdBy: z.string().optional(),
   search: z.string().optional(),
@@ -142,6 +143,7 @@ export const getEvents = asyncMiddleware(
       subCategoryId,
       createdBy,
       search,
+      subCategoryTitle,
       isPublic,
       isFeatured,
       sortBy,
@@ -167,6 +169,10 @@ export const getEvents = asyncMiddleware(
           ilike(event.description, `%${search}%`)
         )
       );
+    }
+    // Filter by category name (using the joined category table)
+    if (subCategoryTitle) {
+      conditions.push(eq(subCategory.title, subCategoryTitle));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -212,7 +218,12 @@ export const getEvents = asyncMiddleware(
         .orderBy(orderByClause)
         .limit(limit)
         .offset(offset),
-      db.select({ count: count() }).from(event).where(whereClause),
+      db
+        .select({ count: count() })
+        .from(event)
+        .leftJoin(category, eq(event.categoryId, category.id))
+        .leftJoin(subCategory, eq(event.subCategoryId, subCategory.id))
+        .where(whereClause),
     ]);
 
     const totalPages = Math.ceil(totalCount[0].count / limit);
@@ -224,6 +235,7 @@ export const getEvents = asyncMiddleware(
         subCategoryId,
         createdBy,
         search,
+        subCategoryTitle,
         isPublic,
         isFeatured,
         sortBy,
