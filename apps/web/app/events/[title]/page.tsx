@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@repo/ui/components/button";
-import { Card, CardContent } from "@repo/ui/components/card";
-import { Clock } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
@@ -58,11 +56,11 @@ export default function BitcoinPage() {
         <div className="container mx-auto px-6 py-4 max-w-6xl">
           {/* Breadcrumb */}
           <div className="flex items-center text-[#757575] mb-6">
-            <Link href="/" className="hover:text-gray-600">
+            <Link href="/events" className="hover:text-gray-600">
               Home
             </Link>
             <span className="mx-2">{">"}</span>
-            <span className="text-[#252525] font-medium">Bitcoin</span>
+            <span className="text-[#252525] font-medium capitalize">{subCategoryTitle}</span>
           </div>
 
           {/* Bitcoin Header */}
@@ -70,7 +68,7 @@ export default function BitcoinPage() {
             <div className="bg-[#F7931A] rounded-full p-3 mr-4 flex items-center justify-center h-10 w-10">
               <span className="text-white font-bold text-xl">₿</span>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900">Bitcoin</h1>
+            <h1 className="text-4xl font-bold text-gray-900 capitalize">{subCategoryTitle}</h1>
           </div>
 
           {/* Custom Tabs */}

@@ -11,7 +11,7 @@ import {
 } from "../controllers/sub-category";
 import { authenticate, requireAdmin } from "src/middleware/auth";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", getAllSubCategories);
 router.get("/:id", getSubCategoryById);

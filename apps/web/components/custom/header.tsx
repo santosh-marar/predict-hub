@@ -185,12 +185,9 @@ export default function Header() {
             >
               <Link href="#">Download App</Link>
             </Button>
-            {pathname === "/" ? (
-              <Link href="/events" passHref>
-                <Button
-                  asChild
-                  className="bg-[#262626] cursor-pointer text-white hover:bg-gray-800 rounded-xs"
-                >
+            {pathname.trim() === "/" ? (
+              <Link href="/events">
+                <Button className="bg-[#262626] cursor-pointer text-white hover:bg-gray-800 rounded-xs">
                   Trade Online
                 </Button>
               </Link>
