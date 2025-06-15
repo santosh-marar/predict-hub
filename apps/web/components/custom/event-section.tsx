@@ -141,6 +141,10 @@ export default function EventsSection() {
    <Link href={`/events/${subCategoryTitle}`}></Link>
   };
 
+  const handleEventClick = (eventTitle) => {
+    <Link href={`/events/details/${eventTitle}`}></Link>
+  };
+
   if (isLoadingCategories || isLoadingEvents) {
     return (
       <section className="bg-gray-100 pb-12">
@@ -221,17 +225,15 @@ export default function EventsSection() {
                         <Button
                           key={subcategory.id}
                           className=" shadow-2xl bg-white text-[#262626] hover:bg-gray-100 transition-colors duration-150"
-                          // onClick={() =>{handleSubcategoryClick(subcategory?.title)}}
                           asChild
                         >
-                          {/* <div
-                            className={`w-6 h-6 ${style.bg} rounded flex items-center justify-center text-white text-xs`}
-                          >
-                            {style.icon}
-                            <ArrowBigDownDash/>
-                          </div> */}
                           <span className="text-sm whitespace-nowrap capitalize font-medium text-black">
-                            <Link href={`/events/${subcategory.title}`} className="">{subcategory.title}</Link>
+                            <Link
+                              href={`/events/${subcategory.title}`}
+                              className=""
+                            >
+                              {subcategory.title}
+                            </Link>
                           </span>
                         </Button>
                       );
@@ -274,65 +276,64 @@ export default function EventsSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {events?.length > 0 ? (
                 events.map((event) => (
-                  <Card
-                    key={event.id}
-                    className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow py-0"
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex flex-col items-start gap-4 mb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Image
-                            src="/Bar_Chart.avif"
-                            alt="chart"
-                            width={20}
-                            height={20}
-                          />
-                          <span className="text-sm text-gray-600 font-medium">
-                            {event.traders
-                              ? event.traders.toLocaleString()
-                              : "0"}{" "}
-                            traders
-                          </span>
-                        </div>
-                        <div className="flex gap-4">
-                          <div
-                            className={`w-16 h-16 ${
-                              event.iconBg || "bg-blue-500"
-                            } rounded-lg flex items-center justify-center text-white text-xl`}
-                          >
-                            {event.icon || "📈"}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-[#262626] font-medium  mb-1 first-letter:capitalize">
-                              {event.title}
-                            </h3>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-[#545454] font-medium flex items-center">
+                  <Link href={`/events/details/${event.title}`} key={event.id}>
+                    <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow py-0">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col items-start gap-4 mb-4">
+                          <div className="flex items-center gap-2 mb-2">
                             <Image
-                              src="/probo_logo.avif"
-                              alt="probo"
+                              src="/Bar_Chart.avif"
+                              alt="chart"
                               width={20}
                               height={20}
                             />
-                            <p>
-                              {" "}
-                              {event.description || "No description available"}
-                            </p>
+                            <span className="text-sm text-gray-600 font-medium">
+                              {event.traders
+                                ? event.traders.toLocaleString()
+                                : "0"}{" "}
+                              traders
+                            </span>
+                          </div>
+                          <div className="flex gap-4">
+                            <div
+                              className={`w-16 h-16 ${
+                                event.iconBg || "bg-blue-500"
+                              } rounded-lg flex items-center justify-center text-white text-xl`}
+                            >
+                              {event.icon || "📈"}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-[#262626] font-medium mb-1 first-letter:capitalize">
+                                {event.title}
+                              </h3>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-[#545454] font-medium flex items-center">
+                              <Image
+                                src="/probo_logo.avif"
+                                alt="probo"
+                                width={20}
+                                height={20}
+                              />
+                              <p>
+                                {event.description ||
+                                  "No description available"}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex gap-4 text-sm font-medium">
-                        <button className="flex-1 bg-[#e8f2ff] text-[#197bff] rounded-md py-2">
-                          Yes @ {event.yesPrice || "N/A"}
-                        </button>
-                        <button className="flex-1 bg-[#fdf3f2] text-[#dc2804] rounded-md py-2 transition">
-                          No @ {event.noPrice || "N/A"}
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        <div className="flex gap-4 text-sm font-medium">
+                          <button className="flex-1 bg-[#e8f2ff] text-[#197bff] rounded-md py-2">
+                            Yes @ {event.yesPrice || "N/A"}
+                          </button>
+                          <button className="flex-1 bg-[#fdf3f2] text-[#dc2804] rounded-md py-2 transition">
+                            No @ {event.noPrice || "N/A"}
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">

@@ -12,6 +12,9 @@ import ProbabilityChart from "./probability-chart";
 import Image from "next/image";
 import DownloadApp from "./download-app";
 import AboutEvent from "./about-event";
+import { useSession } from "@/lib/auth-client";
+import TradingSidebar from "./trading-sidebar";
+import OrderBookTabs from "./order-book-tab";
 
 export default function EventDetails() {
   const [selectedOption, setSelectedOption] = useState<"yes" | "no">("yes");
@@ -23,6 +26,8 @@ export default function EventDetails() {
     yes: number;
     no: number;
   } | null>(null);
+
+  const session=useSession();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -42,7 +47,7 @@ export default function EventDetails() {
   };
 
   return (
-    <div className="container mx-auto py-6 max-w-6xl flex gap-12 relative">
+    <div className="container mx-auto py-6 max-w-6xl flex gap-8 relative">
       {/* Main Content - Left Side */}
       <div className="max-w-3xl flex-1">
         <div className="flex items-center justify-between mb-6">
@@ -97,7 +102,14 @@ export default function EventDetails() {
         </div>
 
         {/* Orderbook Section */}
-        <section id="timeline" className="space-y-6 mb-12">
+        {session?.data && (
+          <section id="orderbook" className="space-y-6 mb-8">
+            <OrderBookTabs />
+          </section>
+        )}
+
+        {/* Timeline Section */}
+        <section id="timeline" className="space-y-6 mb-8">
           <Card className="shadow-none py-0">
             <CardContent className="p-6">
               {/* YES/NO Display - Clickable to toggle */}
@@ -178,7 +190,7 @@ export default function EventDetails() {
         </section>
 
         {/* Timeline Section */}
-        <section id="stats" className="space-y-6 mb-12">
+        <section id="stats" className="space-y-6 mb-8">
           <Card className="shadow-none gap-1">
             <CardHeader className="text-[#262626] font-medium">
               <h2 className="text-xl font-semibold">Stats</h2>
@@ -210,11 +222,11 @@ export default function EventDetails() {
 
         {/* Overview Section */}
         <section id="overview" className="text-xs">
-          <AboutEvent/>
+          <AboutEvent />
         </section>
       </div>
 
-      {/* Download App Section - Right Sidebar - FIXED VERSION */}
+      {/* Download App Section - Right Sidebar */}
       <div className="w-96 flex-shrink-0">
         <div className="sticky top-6">
           <DownloadApp />
