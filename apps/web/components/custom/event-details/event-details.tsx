@@ -2,9 +2,9 @@
 
 import type React from "react";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Share2, Settings, ArrowLeftRight, ChevronRight } from "lucide-react";
+import { Settings, ArrowLeftRight, ChevronRight } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import { Card, CardContent, CardHeader } from "@repo/ui/components/card";
 import ChartSettings from "./chart-settings";
@@ -227,11 +227,15 @@ export default function EventDetails() {
       </div>
 
       {/* Download App Section - Right Sidebar */}
-      <div className="w-96 flex-shrink-0">
-        <div className="sticky top-6">
-          <DownloadApp />
+      {session?.data ? (
+        <TradingSidebar />
+      ) : (
+        <div className="w-96 flex-shrink-0">
+          <div className="sticky top-6">
+            <DownloadApp />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

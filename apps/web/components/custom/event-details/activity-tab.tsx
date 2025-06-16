@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
 import { Card, CardContent } from "@repo/ui/components/card"
-import { ChevronUp, ChevronDown } from "lucide-react"
 
 export default function OrderBookActivityTab() {
   const activities = [
