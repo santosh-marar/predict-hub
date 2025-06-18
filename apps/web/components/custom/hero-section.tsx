@@ -1,6 +1,7 @@
 
 import { Button } from "@repo/ui/components/button";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -37,8 +38,11 @@ export default function HeroSection() {
               >
                 Download App
               </Button>
-              <Button className="px-8 py-3 bg-black text-white hover:bg-gray-800 rounded-xs">
-                Trade Online
+              <Button
+                asChild
+                className="px-8 py-3 bg-black text-white hover:bg-gray-800 rounded-xs"
+              >
+                <Link href="/events"> Trade Online</Link>
               </Button>
             </div>
 

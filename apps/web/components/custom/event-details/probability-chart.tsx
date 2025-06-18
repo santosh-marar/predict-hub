@@ -113,7 +113,6 @@ export default function ProbabilityChart({
   return (
     <div className="w-full h-full">
       {/* Line Chart Container */}
-      {/* <div className="h-full w-full cursor-pointer" onClick={onOptionChange}> */}
       <div className="h-full w-full cursor-pointer">
         <ChartContainer
           config={{
@@ -125,9 +124,7 @@ export default function ProbabilityChart({
           className="h-64 w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={lineData}
-            >
+            <AreaChart data={lineData}>
               <defs>
                 <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={color} stopOpacity={0.3} />
@@ -151,7 +148,13 @@ export default function ProbabilityChart({
               />
 
               <Tooltip content={<CustomAreaTooltip />} />
-              <CartesianGrid stroke="#eee" strokeWidth={1.5} vertical={false} />
+              {showGrids && (
+                <CartesianGrid
+                  stroke="#eee"
+                  strokeWidth={1.5}
+                  vertical={false}
+                />
+              )}
               <Area
                 type="monotone"
                 dataKey="value"
@@ -187,7 +190,7 @@ export default function ProbabilityChart({
               height={1}
               width={0.5}
               onClick={handleBarClick}
-              barCategoryGap={4} 
+              barCategoryGap={4}
             >
               <XAxis
                 dataKey="time"
@@ -199,8 +202,8 @@ export default function ProbabilityChart({
               <YAxis hide domain={[0, "dataMax + 10"]} />
               <Tooltip
                 content={<CustomBarTooltip />}
-                cursor={false} 
-                trigger="click" 
+                cursor={false}
+                trigger="click"
               />
               <Bar
                 dataKey="yes"
