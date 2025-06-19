@@ -540,6 +540,39 @@ export const getEventStats = asyncMiddleware(
   }
 );
 
+export const getProbabilityChart = asyncMiddleware(async (req: Request, res: Response) => {
+    const eventId = req.params.eventId;
+
+    const trades = await db.query.trade.findMany({
+      where: (t, { eq }) => eq(t.eventId, eventId),
+      orderBy: (t) => [t.executedAt],
+    });
+
+    let yesPool = 1000;
+    let noPool = 1000;
+
+    const chartData: { time: string; probability: number }[] = [];
+
+    for (const trade of trades) {
+      const { side, amount, executedAt } = trade;
+
+      if (side === "yes") {
+        yesPool += parseFloat(amount);
+      } else {
+        noPool += parseFloat(amount);
+      }
+
+      const probability = (yesPool / (yesPool + noPool)) * 100;
+
+      chartData.push({
+        time: new Date(executedAt).toISOString(),
+        probability: parseFloat(probability.toFixed(2)),
+      });
+    }
+
+    res.json(chartData);
+})
+
 // Batch operations
 export const batchUpdateEventStatus = asyncMiddleware(
   async (req: AuthRequest, res: Response) => {

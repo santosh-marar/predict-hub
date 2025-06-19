@@ -14,7 +14,7 @@ export enum Role {
 }
 
 // Authentication middleware
-export const authenticate = async (
+export const isAuthenticated = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
