@@ -276,7 +276,10 @@ export default function EventsSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {events?.length > 0 ? (
                 events.map((event) => (
-                  <Link href={`/events/details/${event.title}`} key={event.id}>
+                  <Link
+                    href={`/events/details/${encodeURIComponent(event.title)}?id=${event.id}`}
+                    key={event.id}
+                  >
                     <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow py-0">
                       <CardContent className="p-6">
                         <div className="flex flex-col items-start gap-4 mb-4">

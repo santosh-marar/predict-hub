@@ -8,7 +8,6 @@ import NewsSection from "@/components/custom/news-section";
 import CTASection from "@/components/custom/cta-section";
 
 export default async function Page() {
-
   // const cookieStore = await cookies();
   // const sessionCookie = cookieStore.get("better-auth.session_token");
 
@@ -26,6 +25,21 @@ export default async function Page() {
 
   // const data = await response.json();
   // console.log("data", data);
+
+  // try {
+  //   const response = await fetch(
+  //     "http://localhost:8080/api/v1/order-book/f59cce57-8d6e-4235-9db2-7f797a6b8a5e"
+  //   );
+
+  //   if (!response.ok) {
+  //     throw new Error(`HTTP error! status: ${response.status}`);
+  //   }
+
+  //   const data = await response.json();
+  //   console.log("data", data);
+  // } catch (error) {
+  //   console.error("Fetch error:", error);
+  // }
 
   return (
     <>

@@ -10,7 +10,7 @@ import EventCard from "@/components/custom/event-card";
 import Image from "next/image";
 import { useSession } from "@/lib/auth-client";
 
-export default function BitcoinPage() {
+export default function SubCategoryEvents() {
   const subCategoryTitle = usePathname().split("/")[2];
 
   const user = useSession()?.data?.user;

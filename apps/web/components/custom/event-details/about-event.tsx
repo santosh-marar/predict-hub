@@ -1,9 +1,25 @@
 "use client";
 
+import { formatDateIntoDayMonthYear } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@repo/ui/components/card";
 
-export default function AboutEvent() {
+interface AboutEventProps {
+  sourceOfTruth: string;
+  description: string;
+  endTime: string;
+  startTime: string;
+  rules: string;
+  eventOverviewAndStatistics:string
+}
 
+export default function AboutEvent({
+  sourceOfTruth,
+  description,
+  endTime,
+  startTime,
+  rules,
+  eventOverviewAndStatistics,
+}: AboutEventProps) {
   return (
     <Card className="shadow-none gap-1">
       <CardHeader className="text-[#262626] font-medium">
@@ -15,51 +31,35 @@ export default function AboutEvent() {
             <h5 className="text-xs font-semibold text-[#262626]">
               Source of truth
             </h5>
-            <p className="text-xs text-[#757575]">
-              BTCUSDT(Binance) on Tradingview
-              in.tradingview.com/chart/?symbol=BINANCE%3ABTCUSDT
-            </p>
+            <p className="text-xs text-[#757575]">{sourceOfTruth}</p>
           </div>
           <div>
             <h5 className="text-xs font-semibold text-[#262626]">
               Trading started on
             </h5>
-            <p className="text-xs text-[#757575]">12 Jun, 2025</p>
+            <p className="text-xs text-[#757575]">
+              {" "}
+              {formatDateIntoDayMonthYear(startTime)}
+            </p>
           </div>
           <div>
             <h5 className="text-xs font-semibold text-[#262626]">
               Event expires on
             </h5>
-            <p className="text-xs text-[#757575]">12 Jun, 2025</p>
+            <p className="text-xs text-[#757575]">
+              {formatDateIntoDayMonthYear(endTime)}
+            </p>
           </div>
         </div>
         <div>
           <h5 className="text-xs font-semibold text-[#262626]">
-            Event expires on
+            Event Overview & Statistics
           </h5>
-          <p className="text-xs text-[#757575]">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro,
-            voluptatem mollitia assumenda consequuntur quod dolorem. Excepturi,
-            officia. Quibusdam voluptatum cupiditate rerum beatae voluptas
-            recusandae, vitae suscipit reiciendis exercitationem possimus quas!
-            Corporis, saepe. Reiciendis quae debitis labore dolorem, nostrum,
-            dolor in repellendus natus consectetur voluptas, sint eveniet
-            facere. Molestias magni modi odio placeat officiis! Laboriosam,
-            voluptates facilis sit possimus quia neque.
-          </p>
+          <p className="text-xs text-[#757575]">{eventOverviewAndStatistics}</p>
         </div>
         <div>
           <h5 className="text-xs font-semibold text-[#262626]">Rules</h5>
-          <p className="text-xs text-[#757575]">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro,
-            voluptatem mollitia assumenda consequuntur quod dolorem. Excepturi,
-            officia. Quibusdam voluptatum cupiditate rerum beatae voluptas
-            recusandae, vitae suscipit reiciendis exercitationem possimus quas!
-            Corporis, saepe. Reiciendis quae debitis labore dolorem, nostrum,
-            dolor in repellendus natus consectetur voluptas, sint eveniet
-            facere. Molestias magni modi odio placeat officiis! Laboriosam,
-            voluptates facilis sit possimus quia neque.
-          </p>
+          <p className="text-xs text-[#757575]">{rules}</p>
         </div>
       </CardContent>
     </Card>

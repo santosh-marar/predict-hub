@@ -15,8 +15,14 @@ import AboutEvent from "./about-event";
 import { useSession } from "@/lib/auth-client";
 import TradingSidebar from "./trading-sidebar";
 import OrderBookTabs from "./order-book-tab";
+import { useSearchParams } from "next/navigation";
+import api from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
 
 export default function EventDetails() {
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get("id");
+
   const [selectedOption, setSelectedOption] = useState<"yes" | "no">("yes");
   const [showSettings, setShowSettings] = useState(false);
   const [showGrids, setShowGrids] = useState(true);
@@ -27,7 +33,7 @@ export default function EventDetails() {
     no: number;
   } | null>(null);
 
-  const session=useSession();
+  const session = useSession();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -36,15 +42,55 @@ export default function EventDetails() {
     }
   };
 
-
   const toggleOption = () => {
     setSelectedOption(selectedOption === "yes" ? "no" : "yes");
-    setActiveBarData(null); // Clear bar data when toggling
+    setActiveBarData(null);
   };
 
   const handleBarClick = (data: { time: string; yes: number; no: number }) => {
     setActiveBarData(data);
   };
+
+  const getEventDetails = async () => {
+    const response = await api.get(`/event/${eventId}`);
+    return response.data;
+  };
+
+  const {
+    data: eventData,
+    isLoading: isLoadingEvent,
+    error: errorEvent,
+  } = useQuery({
+    queryKey: ["event"],
+    queryFn: getEventDetails,
+  });
+
+  if (isLoadingEvent) {
+    return <div>Loading...</div>;
+  }
+
+  if (errorEvent) {
+    return <div>Error: {errorEvent.message}</div>;
+  }
+
+  const event = eventData?.data;
+
+  const {
+    title,
+    sourceOfTruth,
+    description,
+    rules,
+    outcome,
+    resolutionTime,
+    startTime,
+    endTime,
+    eventOverviewAndStatistics,
+    isPublic: isPublicBool,
+    isFeatured: isFeaturedBool,
+    imageUrl: imageUrlString,
+    createdAt: createdAtString,
+    updatedAt: updatedAtString,
+  } = event;
 
   return (
     <div className="container mx-auto py-6 max-w-6xl flex gap-8 relative">
@@ -72,10 +118,7 @@ export default function EventDetails() {
             </div>
           </div>
           <div className="flex items-center justify-between gap-8">
-            <h1 className="text-2xl md:text-3xl font-bold">
-              Bitcoin is forecasted to be priced at 107269.21 USDT or more at
-              06:20 PM?
-            </h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{title}</h1>
           </div>
         </div>
 
@@ -222,13 +265,22 @@ export default function EventDetails() {
 
         {/* Overview Section */}
         <section id="overview" className="text-xs">
-          <AboutEvent />
+          <AboutEvent
+            sourceOfTruth={sourceOfTruth}
+            description={description}
+            endTime={endTime}
+            startTime={startTime}
+            rules={rules}
+            eventOverviewAndStatistics={eventOverviewAndStatistics}
+          />
         </section>
       </div>
 
       {/* Download App Section - Right Sidebar */}
       {session?.data ? (
-        <TradingSidebar />
+        <div className="w-96 flex-shrink-0">
+          <TradingSidebar eventId={eventId as string} />
+        </div>
       ) : (
         <div className="w-96 flex-shrink-0">
           <div className="sticky top-6">
