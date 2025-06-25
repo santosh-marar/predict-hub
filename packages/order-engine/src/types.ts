@@ -1,0 +1,63 @@
+import Decimal from "decimal.js";
+
+// Types
+export interface TradeExecution {
+  // id: string,
+  eventId: string;
+  makerUserId: string;
+  takerUserId: string;
+  makerOrderId?: string;
+  takerOrderId: string;
+  side: "yes" | "no";
+  quantity: string;
+  price: string;
+  amount: string;
+  makerFee: string;
+  takerFee: string;
+  tradeType: "ORDER_BOOK" | "AMM_POOL";
+  executedAt: Date;
+  balanceBefore: string;
+  balanceAfter: string;
+}
+
+export interface OrderBookEntry {
+  id: string;
+  userId: string;
+  eventId: string;
+  side: "yes" | "no";
+  type: "buy" | "sell";
+  orderType: "market" | "limit";
+  remainingQuantity: string;
+  limitPrice?: string;
+  createdAt: Date;
+  status: string;
+}
+
+export interface OrderData {
+  userId: string;
+  eventId: string;
+  side: "yes" | "no";
+  type: "buy" | "sell";
+  orderType: "market" | "limit";
+  quantity: string;
+  limitPrice?: string;
+  price?: string;
+  timeInForce?: "GTC" | "IOC" | "FOK";
+}
+
+export interface TransactionData {
+  type: string;
+  relatedOrderId: string;
+  relatedEventId: string;
+  description: string;
+}
+
+export interface PositionParams {
+  userId: string;
+  eventId: string;
+  side: "yes" | "no";
+  shares: string;
+  quantity: Decimal;
+  costBasis: Decimal;
+  averagePrice: string;
+}

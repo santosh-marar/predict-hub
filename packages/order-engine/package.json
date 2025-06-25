@@ -1,0 +1,34 @@
+{
+    "name": "@repo/order-engine",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./dist/index.mjs",
+    "exports": {
+        ".": "./dist/index.mjs"
+    },
+    "types": "./dist/index.d.mts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "typecheck": "tsc --noEmit",
+        "clean": "rimraf dist",
+        "start": "node dist/index.mjs "
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.4.1",
+    "dependencies": {
+        "@repo/db": "workspace:*",
+        "decimal.js": "^10.5.0",
+        "drizzle-orm": "^0.43.1",
+        "postgres": "^3.4.7",
+        "typescript": "^5.8.3",
+        "uuid": "^11.1.0"
+    },
+    "devDependencies": {
+        "tsup": "^8.5.0"
+    }
+}
