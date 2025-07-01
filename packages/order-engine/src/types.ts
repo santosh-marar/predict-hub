@@ -9,15 +9,16 @@ export interface TradeExecution {
   makerOrderId?: string;
   takerOrderId: string;
   side: "yes" | "no";
-  quantity: string;
-  price: string;
-  amount: string;
-  makerFee: string;
-  takerFee: string;
+  quantity: Number;
+  price: Decimal;
+  amount: Decimal;
+  makerFee: Decimal;
+  takerFee: Decimal;
+  totalFees: Decimal;
   tradeType: "ORDER_BOOK" | "AMM_POOL";
   executedAt: Date;
-  balanceBefore: string;
-  balanceAfter: string;
+  balanceBefore: Decimal;
+  balanceAfter: Decimal;
 }
 
 export interface OrderBookEntry {
