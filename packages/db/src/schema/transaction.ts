@@ -25,14 +25,12 @@ export const transaction = pgTable(
     type: text("type", {
       enum: ["deposit", "withdrawal", "trade", "payout", "refund", "bonus"],
     }).notNull(),
-    amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+    amount: decimal("amount", { precision: 20 }).notNull(),
     balanceBefore: decimal("balance_before", {
-      precision: 15,
-      scale: 2,
+      precision: 20,
     }).notNull(),
     balanceAfter: decimal("balance_after", {
-      precision: 15,
-      scale: 2,
+      precision: 20,
     }).notNull(),
 
     // References

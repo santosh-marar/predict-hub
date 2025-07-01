@@ -1,6 +1,13 @@
 import { user } from "./auth";
 import { event } from "./event";
-import { uuid, text, timestamp, decimal, index, pgTable } from "drizzle-orm/pg-core";
+import {
+  uuid,
+  text,
+  timestamp,
+  decimal,
+  index,
+  pgTable,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import {
   createInsertSchema,
@@ -29,20 +36,18 @@ export const order = pgTable(
 
     // Quantities
     originalQuantity: decimal("original_quantity", {
-      precision: 15,
-      scale: 2,
+      precision: 20,
     }).notNull(),
     remainingQuantity: decimal("remaining_quantity", {
-      precision: 15,
-      scale: 2,
+      precision: 20,
     }).notNull(),
-    filledQuantity: decimal("filled_quantity", { precision: 15, scale: 2 })
+    filledQuantity: decimal("filled_quantity", { precision: 20 })
       .default("0")
       .notNull(),
 
     // Pricing
-    limitPrice: decimal("limit_price", { precision: 5, scale: 2 }), // null for market orders
-    averageFillPrice: decimal("average_fill_price", { precision: 5, scale: 2 }),
+    limitPrice: decimal("limit_price", { precision: 20 }), // null for market orders
+    averageFillPrice: decimal("average_fill_price", { precision: 20 }),
 
     // Status and timing
     status: text("status", {
@@ -56,8 +61,8 @@ export const order = pgTable(
     expiresAt: timestamp("expires_at"),
 
     // Execution tracking
-    totalAmount: decimal("total_amount", { precision: 15, scale: 2 }).notNull(),
-    fees: decimal("fees", { precision: 15, scale: 2 }).default("0").notNull(),
+    totalAmount: decimal("total_amount", { precision: 20 }).notNull(),
+    fees: decimal("fees", { precision: 20 }).default("0").notNull(),
 
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -81,8 +86,8 @@ export const order = pgTable(
 );
 
 export const orderSelectSchema = createSelectSchema(order);
-export const orderInsertSchema = createInsertSchema(order); 
-export const orderUpdateSchema= createUpdateSchema(order);
+export const orderInsertSchema = createInsertSchema(order);
+export const orderUpdateSchema = createUpdateSchema(order);
 
 export const orderRelation = relations(order, ({ one, many }) => ({
   user: one(user, {
