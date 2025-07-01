@@ -7,13 +7,15 @@ import {
   pgTable,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import { event } from "./event";
 import { user } from "./auth";
 
-export const position = pgTable(
-  "position",
-  {
+export const position = pgTable("position", {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
@@ -22,11 +24,9 @@ export const position = pgTable(
       .references(() => event.id, { onDelete: "cascade" })
       .notNull(),
 
-    // Position details
-    yesShares: decimal("yes_shares", { precision: 15, scale: 2 })
-      .default("0")
-      .notNull(),
-    noShares: decimal("no_shares", { precision: 15, scale: 2 })
+    side: text("side", { enum: ["YES", "NO"] }).notNull(),
+
+    shares: decimal("shares", { precision: 15, scale: 2 })
       .default("0")
       .notNull(),
 
@@ -34,8 +34,7 @@ export const position = pgTable(
     totalInvested: decimal("total_invested", { precision: 15, scale: 2 })
       .default("0")
       .notNull(),
-    averageYesPrice: decimal("average_yes_price", { precision: 5, scale: 2 }),
-    averageNoPrice: decimal("average_no_price", { precision: 5, scale: 2 }),
+    averagePrice: decimal("average_price", { precision: 5, scale: 2 }),
 
     // P&L tracking
     realizedPnl: decimal("realized_pnl", { precision: 15, scale: 2 })
@@ -59,8 +58,8 @@ export const position = pgTable(
 );
 
 export const positionSelectSchema = createSelectSchema(position);
-export const positionInsertSchema = createInsertSchema(position); 
-export const positionUpdateSchema= createUpdateSchema(position);
+export const positionInsertSchema = createInsertSchema(position);
+export const positionUpdateSchema = createUpdateSchema(position);
 
 export const positionRelation = relations(position, ({ one }) => ({
   user: one(user, {
