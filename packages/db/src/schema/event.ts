@@ -43,25 +43,25 @@ export const event = pgTable(
 
     // Trading mechanics
     totalVolume: decimal("total_volume", { precision: 15, scale: 2 })
-      .default("0")
+      .default("10000")
       .notNull(),
     totalYesShares: decimal("total_yes_shares", { precision: 15, scale: 2 })
-      .default("0")
+      .default("5000")
       .notNull(),
     totalNoShares: decimal("total_no_shares", { precision: 15, scale: 2 })
-      .default("0")
+      .default("5000")
       .notNull(),
 
     // Current prices (0-10)
-    yesPrice: decimal("yes_price", { precision: 5, scale: 2 })
+    lastYesPrice: decimal("last_yes_price", { precision: 5, scale: 2 })
       .default("5")
       .notNull(),
-    noPrice: decimal("no_price", { precision: 5, scale: 2 })
+    lastNoPrice: decimal("last_no_price", { precision: 5, scale: 2 })
       .default("5")
       .notNull(),
 
     // Resolution
-    resolvedOutcome: boolean("resolved_outcome"), // true for YES, false for NO, null for unresolved
+    resolvedOutcome: boolean("resolved_outcome"),
     resolvedBy: text("resolved_by").references(() => user.id),
     resolvedAt: timestamp("resolved_at"),
     resolutionNotes: text("resolution_notes"),

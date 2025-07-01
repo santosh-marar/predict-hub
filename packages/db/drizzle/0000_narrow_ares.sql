@@ -1,3 +1,26 @@
+CREATE TABLE "amm_pool" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"event_id" uuid NOT NULL,
+	"yes_reserve" numeric(15, 2) DEFAULT '1000' NOT NULL,
+	"no_reserve" numeric(15, 2) DEFAULT '1000' NOT NULL,
+	"total_liquidity" numeric(15, 2) DEFAULT '2000' NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"fee_rate" numeric(5, 4) DEFAULT '0.003' NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "amm_pool_event_id_unique" UNIQUE("event_id")
+);
+--> statement-breakpoint
+CREATE TABLE "liquidity_provider" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"event_id" uuid NOT NULL,
+	"shares" numeric(15, 8) NOT NULL,
+	"total_contributed" numeric(15, 2) NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -52,16 +75,30 @@ CREATE TABLE "verification" (
 );
 --> statement-breakpoint
 CREATE TABLE "category" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" text NOT NULL,
 	"slug" text NOT NULL,
 	"description" text,
 	"image_url" text,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "category_name_unique" UNIQUE("name"),
+	CONSTRAINT "category_title_unique" UNIQUE("title"),
 	CONSTRAINT "category_slug_unique" UNIQUE("slug")
+);
+--> statement-breakpoint
+CREATE TABLE "sub_category" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"category_id" uuid NOT NULL,
+	"title" text NOT NULL,
+	"slug" text NOT NULL,
+	"description" text,
+	"image_url" text,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "sub_category_title_unique" UNIQUE("title"),
+	CONSTRAINT "sub_category_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
 CREATE TABLE "comment" (
@@ -81,11 +118,12 @@ CREATE TABLE "comment" (
 );
 --> statement-breakpoint
 CREATE TABLE "event" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"title" text NOT NULL,
 	"description" text,
 	"image_url" text,
 	"category_id" uuid,
+	"sub_category_id" uuid,
 	"created_by" text NOT NULL,
 	"start_time" timestamp,
 	"end_time" timestamp NOT NULL,
@@ -94,12 +132,15 @@ CREATE TABLE "event" (
 	"total_volume" numeric(15, 2) DEFAULT '0' NOT NULL,
 	"total_yes_shares" numeric(15, 2) DEFAULT '0' NOT NULL,
 	"total_no_shares" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"yes_price" numeric(5, 2) DEFAULT '50' NOT NULL,
-	"no_price" numeric(5, 2) DEFAULT '50' NOT NULL,
+	"last_yes_price" numeric(5, 2) DEFAULT '5' NOT NULL,
+	"last_no_price" numeric(5, 2) DEFAULT '5' NOT NULL,
 	"resolved_outcome" boolean,
 	"resolved_by" text,
 	"resolved_at" timestamp,
 	"resolution_notes" text,
+	"source_of_truth" text,
+	"rules" text,
+	"event_overview_and_statistics" text,
 	"tags" text[],
 	"is_public" boolean DEFAULT true NOT NULL,
 	"is_featured" boolean DEFAULT false NOT NULL,
@@ -108,7 +149,7 @@ CREATE TABLE "event" (
 );
 --> statement-breakpoint
 CREATE TABLE "notification" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
 	"type" text NOT NULL,
 	"title" text NOT NULL,
@@ -145,7 +186,7 @@ CREATE TABLE "order" (
 );
 --> statement-breakpoint
 CREATE TABLE "position" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
 	"event_id" uuid NOT NULL,
 	"yes_shares" numeric(15, 2) DEFAULT '0' NOT NULL,
@@ -160,7 +201,7 @@ CREATE TABLE "position" (
 );
 --> statement-breakpoint
 CREATE TABLE "trade" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event_id" uuid NOT NULL,
 	"maker_order_id" uuid NOT NULL,
 	"taker_order_id" uuid NOT NULL,
@@ -177,7 +218,7 @@ CREATE TABLE "trade" (
 );
 --> statement-breakpoint
 CREATE TABLE "transaction" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
 	"type" text NOT NULL,
 	"amount" numeric(15, 2) NOT NULL,
@@ -195,7 +236,7 @@ CREATE TABLE "transaction" (
 );
 --> statement-breakpoint
 CREATE TABLE "wallet" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
 	"balance" numeric(15, 2) DEFAULT '0' NOT NULL,
 	"locked_balance" numeric(15, 2) DEFAULT '0' NOT NULL,
@@ -207,12 +248,16 @@ CREATE TABLE "wallet" (
 	CONSTRAINT "wallet_user_id_unique" UNIQUE("user_id")
 );
 --> statement-breakpoint
+ALTER TABLE "amm_pool" ADD CONSTRAINT "amm_pool_event_id_event_id_fk" FOREIGN KEY ("event_id") REFERENCES "public"."event"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "liquidity_provider" ADD CONSTRAINT "liquidity_provider_event_id_event_id_fk" FOREIGN KEY ("event_id") REFERENCES "public"."event"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "sub_category" ADD CONSTRAINT "sub_category_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."category"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "comment" ADD CONSTRAINT "comment_event_id_event_id_fk" FOREIGN KEY ("event_id") REFERENCES "public"."event"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "comment" ADD CONSTRAINT "comment_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "comment" ADD CONSTRAINT "comment_hidden_by_user_id_fk" FOREIGN KEY ("hidden_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "event" ADD CONSTRAINT "event_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."category"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "event" ADD CONSTRAINT "event_sub_category_id_sub_category_id_fk" FOREIGN KEY ("sub_category_id") REFERENCES "public"."sub_category"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "event" ADD CONSTRAINT "event_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "event" ADD CONSTRAINT "event_resolved_by_user_id_fk" FOREIGN KEY ("resolved_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification" ADD CONSTRAINT "notification_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

@@ -14,8 +14,7 @@ export const trade = pgTable(
 
     // Maker and taker orders
     makerOrderId: uuid("maker_order_id")
-      .references(() => order.id)
-      .notNull(),
+      .references(() => order.id),
     takerOrderId: uuid("taker_order_id")
       .references(() => order.id)
       .notNull(),
