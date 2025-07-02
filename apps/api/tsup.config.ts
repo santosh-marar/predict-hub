@@ -13,4 +13,5 @@ export default defineConfig({
   esbuildOptions(options) {
     options.platform = "node";
   },
+  external: ["@repo/order-engine", "@repo/db"],
 });
