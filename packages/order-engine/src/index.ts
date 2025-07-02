@@ -9,8 +9,6 @@ import { OrderBookEntry, OrderData, TradeExecution } from "./types";
 import Decimal from "decimal.js";
 import {sql, desc, eq, gt, gte, asc, lte, and} from "drizzle-orm";
 
-
-
 /**
  * Main entry point for placing orders
  */

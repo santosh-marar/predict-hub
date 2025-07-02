@@ -4,6 +4,7 @@ import { TAKER_FEE_RATE } from "@/constants";
 import { wallet } from "@repo/db";
 import { TradeExecution } from "@/types";
 import { eq } from "drizzle-orm";
+import { upsertUserPosition } from "./position";
 
 /**
  * Execute trade against AMM when order book can't fulfill completely
@@ -68,10 +69,11 @@ export async function executeAMMTrade(
     balanceBefore: takerBalanceBefore,
   };
 
-  // Insert trade record and transfer funds
+  // 1. Insert trade record and transfer funds
   await insertTradeRecord(tx, ammTradeExecution);
 
-  // Todo: Update Or Insert position of user
+  // 2. Update Or Insert position of user
+  await upsertUserPosition(tx, ammTradeExecution);
 
   // Todo: Insert transaction record
 

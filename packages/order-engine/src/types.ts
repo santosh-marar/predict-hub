@@ -41,8 +41,8 @@ export interface OrderData {
   type: "buy" | "sell";
   orderType: "market" | "limit";
   quantity: string;
-  limitPrice?: string;
-  price?: string;
+  limitPrice?: number;
+  price?: number;
   timeInForce?: "GTC" | "IOC" | "FOK";
 }
 
