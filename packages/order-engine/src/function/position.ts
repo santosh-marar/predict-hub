@@ -10,8 +10,7 @@ export async function upsertUserPosition(
   tx: any,
   positionData: any
 ): Promise<void> {
-  console.log("positionData", positionData);
-
+  
   const existingPosition = await tx
     .select()
     .from(position)

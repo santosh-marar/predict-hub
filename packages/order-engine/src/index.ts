@@ -8,6 +8,8 @@ import { executeAMMTrade } from "./function/amm";
 import { OrderBookEntry, OrderData, TradeExecution } from "./types";
 import Decimal from "decimal.js";
 import {sql, desc, eq, gt, gte, asc, lte, and} from "drizzle-orm";
+import { upsertUserPosition } from "./function/position";
+import { createTransactionRecords } from "./function/transaction";
 
 /**
  * Main entry point for placing orders
@@ -135,12 +137,14 @@ export async function matchOrder(
       balanceBefore: takerBalanceAfter,
     };
 
-    // Insert trade record and update orders
+    // 2. Insert trade record and update orders
     await insertTradeRecord(tx, tradeExecution);
 
-    // Todo: Update Or Insert position of user
+    // 3. Update Or Insert position of user
+    await upsertUserPosition(tx, tradeExecution);
 
-    // Todo: Insert transaction record
+    // 4. Insert transaction record
+    await createTransactionRecords(tx, newOrder, matchingOrder, tradeExecution);
 
     // Todo: Update both parties user wallet
 

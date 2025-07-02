@@ -5,6 +5,7 @@ import { wallet } from "@repo/db";
 import { TradeExecution } from "@/types";
 import { eq } from "drizzle-orm";
 import { upsertUserPosition } from "./position";
+import { createTransactionRecordAMM } from "./transaction";
 
 /**
  * Execute trade against AMM when order book can't fulfill completely
@@ -75,7 +76,8 @@ export async function executeAMMTrade(
   // 2. Update Or Insert position of user
   await upsertUserPosition(tx, ammTradeExecution);
 
-  // Todo: Insert transaction record
+  // 3. Insert transaction record
+  await createTransactionRecordAMM(tx, newOrder, ammTradeExecution);
 
   // Todo: After tarde calculate new AMM price after trade (simple bonding curve)
 
