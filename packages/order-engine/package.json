@@ -12,9 +12,11 @@
     ],
     "scripts": {
         "build": "tsup",
+        "build:watch": "tsup --watch",
+        "dev": "tsup --watch",
         "typecheck": "tsc --noEmit",
         "clean": "rimraf dist",
-        "start": "node dist/index.mjs "
+        "start": "node dist/index.mjs"
     },
     "keywords": [],
     "author": "",
