@@ -7,8 +7,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "dev:api": "turbo run dev --filter=api...",
+    "dev:packages": "turbo run dev --filter=@repo/order-engine --filter=@repo/db --parallel",
+    "build:watch": "turbo run build:watch --parallel",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "db:check": "turbo run db:check",
@@ -16,7 +19,8 @@
     "db:migrate": "turbo run db:migrate",
     "db:drop": "turbo run db:drop",
     "check-types": "turbo run check-types",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@better-auth/cli": "^1.2.7",
