@@ -11,21 +11,21 @@ export const wallet = pgTable("wallet", {
     .notNull(),
 
   // Balances
-  balance: decimal("balance", { precision: 20})
+  balance: decimal("balance", { precision: 15, scale: 5 })
     .default("0")
     .notNull(),
-  lockedBalance: decimal("locked_balance", { precision: 20})
+  lockedBalance: decimal("locked_balance", { precision: 15, scale: 5 })
     .default("0")
     .notNull(),
 
   // Lifetime stats
-  totalDeposited: decimal("total_deposited", { precision: 20})
+  totalDeposited: decimal("total_deposited", { precision: 15, scale: 5 })
     .default("0")
     .notNull(),
-  totalWithdrawn: decimal("total_withdrawn", { precision: 20})
+  totalWithdrawn: decimal("total_withdrawn", { precision: 15, scale: 5 })
     .default("0")
     .notNull(),
-  totalPnl: decimal("total_pnl", { precision: 20})
+  totalPnl: decimal("total_pnl", { precision: 15, scale: 5 })
     .default("0")
     .notNull(),
 

@@ -42,21 +42,21 @@ export const event = pgTable(
       .notNull(),
 
     // Trading mechanics
-    totalVolume: decimal("total_volume", { precision: 20})
+    totalVolume: decimal("total_volume", { precision: 15, scale: 5 })
       .default("10000")
       .notNull(),
-    totalYesShares: decimal("total_yes_shares", { precision: 20})
+    totalYesShares: decimal("total_yes_shares", { precision: 15, scale: 5 })
       .default("5000")
       .notNull(),
-    totalNoShares: decimal("total_no_shares", { precision: 20})
+    totalNoShares: decimal("total_no_shares", { precision: 15, scale: 5 })
       .default("5000")
       .notNull(),
 
     // Current prices (0-10)
-    lastYesPrice: decimal("last_yes_price", { precision:20})
+    lastYesPrice: decimal("last_yes_price", { precision: 15, scale: 5 })
       .default("5")
       .notNull(),
-    lastNoPrice: decimal("last_no_price", { precision:20})
+    lastNoPrice: decimal("last_no_price", { precision: 15, scale: 5 })
       .default("5")
       .notNull(),
 

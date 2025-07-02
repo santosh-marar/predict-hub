@@ -2,14 +2,7 @@ import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { event } from "./event";
 import { order } from "./order";
-import {
-  uuid,
-  text,
-  timestamp,
-  decimal,
-  index,
-  pgTable,
-} from "drizzle-orm/pg-core";
+import { uuid, text, timestamp, decimal, index, pgTable } from "drizzle-orm/pg-core";
 
 export const trade = pgTable(
   "trade",
@@ -20,7 +13,8 @@ export const trade = pgTable(
       .notNull(),
 
     // Maker and taker orders
-    makerOrderId: uuid("maker_order_id").references(() => order.id),
+    makerOrderId: uuid("maker_order_id")
+      .references(() => order.id),
     takerOrderId: uuid("taker_order_id")
       .references(() => order.id)
       .notNull(),
@@ -33,14 +27,20 @@ export const trade = pgTable(
 
     // Trade details
     side: text("side", { enum: ["yes", "no"] }).notNull(),
-    quantity: decimal("quantity", { precision: 20 }).notNull(),
-    price: decimal("price", { precision: 20 }).notNull(),
-    amount: decimal("amount", { precision: 20 }).notNull(),
+    quantity: decimal("quantity", { precision: 15, scale: 5 }).notNull(),
+    price: decimal("price", { precision: 15, scale: 5 }).notNull(),
+    amount: decimal("amount", { precision: 15, scale: 5 }).notNull(),
 
     // Fees (split between maker and taker)
-    makerFee: decimal("maker_fee", { precision: 20 }).default("0").notNull(),
-    takerFee: decimal("taker_fee", { precision: 20 }).default("0").notNull(),
-    totalFees: decimal("total_fees", { precision: 20 }).default("0").notNull(),
+    makerFee: decimal("maker_fee", { precision: 15, scale: 5 })
+      .default("0")
+      .notNull(),
+    takerFee: decimal("taker_fee", { precision: 15, scale: 5 })
+      .default("0")
+      .notNull(),
+    totalFees: decimal("total_fees", { precision: 15, scale: 5 })
+      .default("0")
+      .notNull(),
 
     executedAt: timestamp("executed_at").defaultNow().notNull(),
   },

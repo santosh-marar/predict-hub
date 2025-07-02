@@ -14,17 +14,17 @@ export const ammPool = pgTable("amm_pool", {
     .references(() => event.id)
     .unique()
     .notNull(),
-  yesReserve: decimal("yes_reserve", { precision: 20 })
+  yesReserve: decimal("yes_reserve", { precision: 15, scale: 5 })
     .default("1000")
     .notNull(),
-  noReserve: decimal("no_reserve", { precision: 20 })
+  noReserve: decimal("no_reserve", { precision: 15, scale: 5 })
     .default("1000")
     .notNull(),
-  totalLiquidity: decimal("total_liquidity", { precision: 20 })
+  totalLiquidity: decimal("total_liquidity", { precision: 15, scale: 5 })
     .default("2000")
     .notNull(),
   isActive: boolean("is_active").default(true).notNull(),
-  feeRate: decimal("fee_rate", { precision: 20 })
+  feeRate: decimal("fee_rate", { precision: 15, scale: 5 })
     .default("0.003")
     .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -38,9 +38,10 @@ export const liquidityProvider = pgTable("liquidity_provider", {
   eventId: uuid("event_id")
     .references(() => event.id)
     .notNull(),
-  shares: decimal("shares", { precision: 20 }).notNull(),
+  shares: decimal("shares", { precision: 15 }).notNull(),
   totalContributed: decimal("total_contributed", {
-    precision: 20,
+    precision: 15,
+    scale: 5,
   }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
