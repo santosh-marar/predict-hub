@@ -66,3 +66,71 @@ export async function lockUserFunds(
     })
     .where(eq(wallet.userId, userId));
 }
+
+/**
+ * Deduct locked funds from user
+ */
+export async function deductLockedFunds(
+  tx: any,
+  userId: string,
+  amount: Decimal
+): Promise<void> {
+  await tx
+    .update(wallet)
+    .set({
+      lockedBalance: sql`locked_balance - ${amount.toString()}`,
+      updatedAt: new Date(),
+    })
+    .where(eq(wallet.userId, userId));
+}
+
+
+/**
+ * Unlock user funds after order is filled
+ */
+export async function unlockUserFunds(
+  tx: any,
+  userId: string,
+  amount: Decimal
+): Promise<void> {
+
+  const [userWallet] = await tx
+    .select()
+    .from(wallet)
+    .where(eq(wallet.userId, userId))
+    .limit(1);
+
+  if (!userWallet) {
+    throw new Error("User wallet not found");
+  }
+
+  const lockedBalance = new Decimal(userWallet.lockedBalance);
+
+  await tx
+    .update(wallet)
+    .set({
+      balance: sql`${wallet.balance} + ${lockedBalance.toString()}`,
+      lockedBalance: sql`${wallet.lockedBalance} - ${lockedBalance.toString()}`,
+      updatedAt: new Date(),
+    })
+    .where(eq(wallet.userId, userId));
+}
+
+/**
+ * Credit user balance
+ */
+export async function creditUserBalance(
+  tx: any,
+  userId: string,
+  amount: Decimal
+): Promise<void> {
+  await tx
+    .update(wallet)
+    .set({
+      availableBalance: sql`available_balance + ${amount.toString()}`,
+      updatedAt: new Date(),
+    })
+    .where(eq(wallet.userId, userId));
+}
+
+

@@ -6,6 +6,7 @@ import { TradeExecution } from "@/types";
 import { eq } from "drizzle-orm";
 import { upsertUserPosition } from "./position";
 import { createTransactionRecordAMM } from "./transaction";
+import { deductLockedFunds, unlockUserFunds } from "./fund";
 
 /**
  * Execute trade against AMM when order book can't fulfill completely
@@ -122,7 +123,11 @@ export async function executeAMMTrade(
     })
     .where(eq(order.id, newOrder.id));
 
-  // Todo: Update taker wallet
+  // 7. Update taker wallet balance 
+  await deductLockedFunds(tx, newOrder.userId, ammTradeExecution.totalFees);
+
+  // 8. Unlock remaining funds
+  await unlockUserFunds(tx, newOrder.userId, ammTradeExecution.totalFees);
 
   return ammTradeExecution;
 }
