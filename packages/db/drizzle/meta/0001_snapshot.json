@@ -1,6 +1,6 @@
 {
-  "id": "db17ef2c-453e-472e-aff8-41c7d3b0ada2",
-  "prevId": "3af7ed09-54fd-4622-aac1-5a8f1cefd472",
+  "id": "67f8db67-01a3-4b18-9f4f-2d72a7c89d28",
+  "prevId": "54a2bf7a-13ea-45f0-a27c-e60fe2b518ea",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -23,21 +23,21 @@
         },
         "yes_reserve": {
           "name": "yes_reserve",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'1000'"
         },
         "no_reserve": {
           "name": "no_reserve",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'1000'"
         },
         "total_liquidity": {
           "name": "total_liquidity",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'2000'"
@@ -51,7 +51,7 @@
         },
         "fee_rate": {
           "name": "fee_rate",
-          "type": "numeric(5, 4)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0.003'"
@@ -126,13 +126,13 @@
         },
         "shares": {
           "name": "shares",
-          "type": "numeric(15, 8)",
+          "type": "numeric(15)",
           "primaryKey": false,
           "notNull": true
         },
         "total_contributed": {
           "name": "total_contributed",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
@@ -954,35 +954,35 @@
         },
         "total_volume": {
           "name": "total_volume",
-          "type": "numeric(15, 2)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": true,
           "default": "'10000'"
         },
         "total_yes_shares": {
           "name": "total_yes_shares",
-          "type": "numeric(15, 2)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": true,
           "default": "'5000'"
         },
         "total_no_shares": {
           "name": "total_no_shares",
-          "type": "numeric(15, 2)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": true,
           "default": "'5000'"
         },
         "last_yes_price": {
           "name": "last_yes_price",
-          "type": "numeric(5, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'5'"
         },
         "last_no_price": {
           "name": "last_no_price",
-          "type": "numeric(5, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'5'"
@@ -1417,32 +1417,32 @@
         },
         "original_quantity": {
           "name": "original_quantity",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
         "remaining_quantity": {
           "name": "remaining_quantity",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
         "filled_quantity": {
           "name": "filled_quantity",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "limit_price": {
           "name": "limit_price",
-          "type": "numeric(5, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": false
         },
         "average_fill_price": {
           "name": "average_fill_price",
-          "type": "numeric(5, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": false
         },
@@ -1468,13 +1468,13 @@
         },
         "total_amount": {
           "name": "total_amount",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
         "fees": {
           "name": "fees",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
@@ -1664,49 +1664,42 @@
           "primaryKey": false,
           "notNull": true
         },
-        "yes_shares": {
-          "name": "yes_shares",
-          "type": "numeric(15, 2)",
+        "side": {
+          "name": "side",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'0'"
+          "notNull": true
         },
-        "no_shares": {
-          "name": "no_shares",
-          "type": "numeric(15, 2)",
+        "shares": {
+          "name": "shares",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "total_invested": {
           "name": "total_invested",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
-        "average_yes_price": {
-          "name": "average_yes_price",
-          "type": "numeric(5, 2)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "average_no_price": {
-          "name": "average_no_price",
-          "type": "numeric(5, 2)",
+        "average_price": {
+          "name": "average_price",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": false
         },
         "realized_pnl": {
           "name": "realized_pnl",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "unrealized_pnl": {
           "name": "unrealized_pnl",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
@@ -1862,39 +1855,39 @@
         },
         "quantity": {
           "name": "quantity",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
         "price": {
           "name": "price",
-          "type": "numeric(5, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
         "amount": {
           "name": "amount",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
         "maker_fee": {
           "name": "maker_fee",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "taker_fee": {
           "name": "taker_fee",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "total_fees": {
           "name": "total_fees",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
@@ -2072,8 +2065,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.transaction": {
-      "name": "transaction",
+    "public.transactions": {
+      "name": "transactions",
       "schema": "",
       "columns": {
         "id": {
@@ -2097,19 +2090,37 @@
         },
         "amount": {
           "name": "amount",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
+        "total_fees": {
+          "name": "total_fees",
+          "type": "numeric(15, 5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "taker_fees": {
+          "name": "taker_fees",
+          "type": "numeric(15, 5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maker_fees": {
+          "name": "maker_fees",
+          "type": "numeric(15, 5)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "balance_before": {
           "name": "balance_before",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
         "balance_after": {
           "name": "balance_after",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true
         },
@@ -2233,9 +2244,9 @@
         }
       },
       "foreignKeys": {
-        "transaction_user_id_user_id_fk": {
-          "name": "transaction_user_id_user_id_fk",
-          "tableFrom": "transaction",
+        "transactions_user_id_user_id_fk": {
+          "name": "transactions_user_id_user_id_fk",
+          "tableFrom": "transactions",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
@@ -2246,9 +2257,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "transaction_related_order_id_order_id_fk": {
-          "name": "transaction_related_order_id_order_id_fk",
-          "tableFrom": "transaction",
+        "transactions_related_order_id_order_id_fk": {
+          "name": "transactions_related_order_id_order_id_fk",
+          "tableFrom": "transactions",
           "tableTo": "order",
           "columnsFrom": [
             "related_order_id"
@@ -2259,9 +2270,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "transaction_related_event_id_event_id_fk": {
-          "name": "transaction_related_event_id_event_id_fk",
-          "tableFrom": "transaction",
+        "transactions_related_event_id_event_id_fk": {
+          "name": "transactions_related_event_id_event_id_fk",
+          "tableFrom": "transactions",
           "tableTo": "event",
           "columnsFrom": [
             "related_event_id"
@@ -2298,35 +2309,35 @@
         },
         "balance": {
           "name": "balance",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "locked_balance": {
           "name": "locked_balance",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "total_deposited": {
           "name": "total_deposited",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "total_withdrawn": {
           "name": "total_withdrawn",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"
         },
         "total_pnl": {
           "name": "total_pnl",
-          "type": "numeric(15, 2)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0'"

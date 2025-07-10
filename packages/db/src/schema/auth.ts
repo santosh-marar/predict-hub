@@ -9,7 +9,7 @@ import { event } from "./event";
 import { position } from "./position";
 import { trade } from "./trade";
 import { wallet } from "./wallet";
-import { transaction } from "./transaction";
+import { transactions } from "./transactions";
 import { comment } from "./comment";
 import { notification } from "./notification";
 import { order } from "./order";
@@ -78,7 +78,7 @@ export const userRelation = relations(user, ({ many, one }) => ({
   position: many(position),
   trade: many(trade),
   wallet: one(wallet),
-  transaction: many(transaction),
+  transaction: many(transactions),
   comment: many(comment),
   notification: many(notification),
   order: many(order),

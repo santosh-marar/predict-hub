@@ -42,13 +42,13 @@ export const event = pgTable(
       .notNull(),
 
     // Trading mechanics
-    totalVolume: decimal("total_volume", { precision: 15, scale: 5 })
+    totalVolume: decimal("total_volume")
       .default("10000")
       .notNull(),
-    totalYesShares: decimal("total_yes_shares", { precision: 15, scale: 5 })
+    totalYesShares: decimal("total_yes_shares")
       .default("5000")
       .notNull(),
-    totalNoShares: decimal("total_no_shares", { precision: 15, scale: 5 })
+    totalNoShares: decimal("total_no_shares")
       .default("5000")
       .notNull(),
 

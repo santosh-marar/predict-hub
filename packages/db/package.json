@@ -26,16 +26,16 @@
   "license": "ISC",
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "drizzle-orm": "^0.43.1",
     "drizzle-zod": "^0.7.1",
     "postgres": "^3.4.7",
     "typescript": "^5.8.3",
-    "zod": "^3.25.49"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@types/node": "^20.17.57",
-    "drizzle-kit": "^0.31.1",
+    "@types/node": "^20.19.4",
+    "drizzle-kit": "^0.31.4",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0"
   }

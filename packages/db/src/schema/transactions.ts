@@ -6,15 +6,19 @@ import {
   pgTable,
   index,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import { user } from "./auth";
 import { order } from "./order";
 import { event } from "./event";
 import { relations } from "drizzle-orm";
 
 // Wallet transactions (deposits, withdrawals, etc.)
-export const transaction = pgTable(
-  "transaction",
+export const transactions = pgTable(
+  "transactions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id")
@@ -26,6 +30,9 @@ export const transaction = pgTable(
       enum: ["deposit", "withdrawal", "trade", "payout", "refund", "bonus"],
     }).notNull(),
     amount: decimal("amount", { precision: 15, scale: 5 }).notNull(),
+    totalFees: decimal("total_fees", { precision: 15, scale: 5 }).notNull(),
+    takerFees: decimal("taker_fees", { precision: 15, scale: 5 }).notNull(),
+    makerFees: decimal("maker_fees", { precision: 15, scale: 5 }),
     balanceBefore: decimal("balance_before", {
       precision: 15,
       scale: 5,
@@ -64,21 +71,21 @@ export const transaction = pgTable(
   })
 );
 
-export const transactionSelectSchema = createSelectSchema(transaction);
-export const transactionInsertSchema = createInsertSchema(transaction);
-export const transactionUpdateSchema= createUpdateSchema(transaction);
+export const transactionSelectSchema = createSelectSchema(transactions);
+export const transactionInsertSchema = createInsertSchema(transactions);
+export const transactionUpdateSchema = createUpdateSchema(transactions);
 
-export const transactionRelation = relations(transaction, ({ one }) => ({
+export const transactionRelation = relations(transactions, ({ one }) => ({
   user: one(user, {
-    fields: [transaction.userId],
+    fields: [transactions.userId],
     references: [user.id],
   }),
   relatedOrder: one(order, {
-    fields: [transaction.relatedOrderId],
+    fields: [transactions.relatedOrderId],
     references: [order.id],
   }),
   relatedEvent: one(event, {
-    fields: [transaction.relatedEventId],
+    fields: [transactions.relatedEventId],
     references: [event.id],
   }),
 }));

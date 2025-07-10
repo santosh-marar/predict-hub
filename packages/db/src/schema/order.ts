@@ -41,8 +41,8 @@ export const order = pgTable(
       .notNull(),
 
     // Pricing
-    limitPrice: decimal("limit_price", { precision: 5, scale: 5 }), // null for market orders
-    averageFillPrice: decimal("average_fill_price", { precision: 5, scale: 5 }),
+    limitPrice: decimal("limit_price", { precision: 15, scale: 5 }), // null for market orders
+    averageFillPrice: decimal("average_fill_price", { precision: 15, scale: 5 }),
 
     // Status and timing
     status: text("status", {

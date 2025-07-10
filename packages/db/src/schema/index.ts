@@ -6,6 +6,6 @@ export * from "./notification";
 export * from "./order";
 export * from "./position";
 export * from "./trade";
-export * from "./transaction";  
+export * from "./transactions";
 export * from "./wallet";
 export * from "./amm";

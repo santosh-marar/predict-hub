@@ -1,11 +1,11 @@
 CREATE TABLE "amm_pool" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event_id" uuid NOT NULL,
-	"yes_reserve" numeric(15, 2) DEFAULT '1000' NOT NULL,
-	"no_reserve" numeric(15, 2) DEFAULT '1000' NOT NULL,
-	"total_liquidity" numeric(15, 2) DEFAULT '2000' NOT NULL,
+	"yes_reserve" numeric(15, 5) DEFAULT '1000' NOT NULL,
+	"no_reserve" numeric(15, 5) DEFAULT '1000' NOT NULL,
+	"total_liquidity" numeric(15, 5) DEFAULT '2000' NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
-	"fee_rate" numeric(5, 4) DEFAULT '0.003' NOT NULL,
+	"fee_rate" numeric(15, 5) DEFAULT '0.003' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "amm_pool_event_id_unique" UNIQUE("event_id")
@@ -15,8 +15,8 @@ CREATE TABLE "liquidity_provider" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"event_id" uuid NOT NULL,
-	"shares" numeric(15, 8) NOT NULL,
-	"total_contributed" numeric(15, 2) NOT NULL,
+	"shares" numeric(15) NOT NULL,
+	"total_contributed" numeric(15, 5) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -129,11 +129,11 @@ CREATE TABLE "event" (
 	"end_time" timestamp NOT NULL,
 	"resolution_time" timestamp,
 	"status" text DEFAULT 'draft' NOT NULL,
-	"total_volume" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"total_yes_shares" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"total_no_shares" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"last_yes_price" numeric(5, 2) DEFAULT '5' NOT NULL,
-	"last_no_price" numeric(5, 2) DEFAULT '5' NOT NULL,
+	"total_volume" numeric(15, 5) DEFAULT '10000' NOT NULL,
+	"total_yes_shares" numeric(15, 5) DEFAULT '5000' NOT NULL,
+	"total_no_shares" numeric(15, 5) DEFAULT '5000' NOT NULL,
+	"last_yes_price" numeric(15, 5) DEFAULT '5' NOT NULL,
+	"last_no_price" numeric(15, 5) DEFAULT '5' NOT NULL,
 	"resolved_outcome" boolean,
 	"resolved_by" text,
 	"resolved_at" timestamp,
@@ -169,16 +169,16 @@ CREATE TABLE "order" (
 	"side" text NOT NULL,
 	"type" text NOT NULL,
 	"order_type" text DEFAULT 'limit' NOT NULL,
-	"original_quantity" numeric(15, 2) NOT NULL,
-	"remaining_quantity" numeric(15, 2) NOT NULL,
-	"filled_quantity" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"limit_price" numeric(5, 2),
-	"average_fill_price" numeric(5, 2),
+	"original_quantity" numeric(15, 5) NOT NULL,
+	"remaining_quantity" numeric(15, 5) NOT NULL,
+	"filled_quantity" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"limit_price" numeric(5, 5),
+	"average_fill_price" numeric(5, 5),
 	"status" text DEFAULT 'pending' NOT NULL,
 	"time_in_force" text DEFAULT 'GTC' NOT NULL,
 	"expires_at" timestamp,
-	"total_amount" numeric(15, 2) NOT NULL,
-	"fees" numeric(15, 2) DEFAULT '0' NOT NULL,
+	"total_amount" numeric(15, 5) NOT NULL,
+	"fees" numeric(15, 5) DEFAULT '0' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"filled_at" timestamp,
@@ -189,13 +189,12 @@ CREATE TABLE "position" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
 	"event_id" uuid NOT NULL,
-	"yes_shares" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"no_shares" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"total_invested" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"average_yes_price" numeric(5, 2),
-	"average_no_price" numeric(5, 2),
-	"realized_pnl" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"unrealized_pnl" numeric(15, 2) DEFAULT '0' NOT NULL,
+	"side" text NOT NULL,
+	"shares" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"total_invested" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"average_price" numeric(15, 5),
+	"realized_pnl" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"unrealized_pnl" numeric(15, 5) DEFAULT '0' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -203,27 +202,30 @@ CREATE TABLE "position" (
 CREATE TABLE "trade" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event_id" uuid NOT NULL,
-	"maker_order_id" uuid NOT NULL,
+	"maker_order_id" uuid,
 	"taker_order_id" uuid NOT NULL,
 	"maker_user_id" text NOT NULL,
 	"taker_user_id" text NOT NULL,
 	"side" text NOT NULL,
-	"quantity" numeric(15, 2) NOT NULL,
-	"price" numeric(5, 2) NOT NULL,
-	"amount" numeric(15, 2) NOT NULL,
-	"maker_fee" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"taker_fee" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"total_fees" numeric(15, 2) DEFAULT '0' NOT NULL,
+	"quantity" numeric(15, 5) NOT NULL,
+	"price" numeric(15, 5) NOT NULL,
+	"amount" numeric(15, 5) NOT NULL,
+	"maker_fee" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"taker_fee" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"total_fees" numeric(15, 5) DEFAULT '0' NOT NULL,
 	"executed_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "transaction" (
+CREATE TABLE "transactions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
 	"type" text NOT NULL,
-	"amount" numeric(15, 2) NOT NULL,
-	"balance_before" numeric(15, 2) NOT NULL,
-	"balance_after" numeric(15, 2) NOT NULL,
+	"amount" numeric(15, 5) NOT NULL,
+	"total_fees" numeric(15, 5) NOT NULL,
+	"taker_fees" numeric(15, 5) NOT NULL,
+	"maker_fees" numeric(15, 5),
+	"balance_before" numeric(15, 5) NOT NULL,
+	"balance_after" numeric(15, 5) NOT NULL,
 	"related_order_id" uuid,
 	"related_event_id" uuid,
 	"payment_method" text,
@@ -238,11 +240,11 @@ CREATE TABLE "transaction" (
 CREATE TABLE "wallet" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
-	"balance" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"locked_balance" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"total_deposited" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"total_withdrawn" numeric(15, 2) DEFAULT '0' NOT NULL,
-	"total_pnl" numeric(15, 2) DEFAULT '0' NOT NULL,
+	"balance" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"locked_balance" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"total_deposited" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"total_withdrawn" numeric(15, 5) DEFAULT '0' NOT NULL,
+	"total_pnl" numeric(15, 5) DEFAULT '0' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "wallet_user_id_unique" UNIQUE("user_id")
@@ -273,9 +275,9 @@ ALTER TABLE "trade" ADD CONSTRAINT "trade_maker_order_id_order_id_fk" FOREIGN KE
 ALTER TABLE "trade" ADD CONSTRAINT "trade_taker_order_id_order_id_fk" FOREIGN KEY ("taker_order_id") REFERENCES "public"."order"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "trade" ADD CONSTRAINT "trade_maker_user_id_user_id_fk" FOREIGN KEY ("maker_user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "trade" ADD CONSTRAINT "trade_taker_user_id_user_id_fk" FOREIGN KEY ("taker_user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "transaction" ADD CONSTRAINT "transaction_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "transaction" ADD CONSTRAINT "transaction_related_order_id_order_id_fk" FOREIGN KEY ("related_order_id") REFERENCES "public"."order"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "transaction" ADD CONSTRAINT "transaction_related_event_id_event_id_fk" FOREIGN KEY ("related_event_id") REFERENCES "public"."event"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_related_order_id_order_id_fk" FOREIGN KEY ("related_order_id") REFERENCES "public"."order"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_related_event_id_event_id_fk" FOREIGN KEY ("related_event_id") REFERENCES "public"."event"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "wallet" ADD CONSTRAINT "wallet_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "comments_event_idx" ON "comment" USING btree ("event_id");--> statement-breakpoint
 CREATE INDEX "comments_user_idx" ON "comment" USING btree ("user_id");--> statement-breakpoint
@@ -302,7 +304,7 @@ CREATE INDEX "trades_taker_user_idx" ON "trade" USING btree ("taker_user_id");--
 CREATE INDEX "trades_executed_at_idx" ON "trade" USING btree ("executed_at");--> statement-breakpoint
 CREATE INDEX "trades_maker_order_idx" ON "trade" USING btree ("maker_order_id");--> statement-breakpoint
 CREATE INDEX "trades_taker_order_idx" ON "trade" USING btree ("taker_order_id");--> statement-breakpoint
-CREATE INDEX "transactions_user_idx" ON "transaction" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "transactions_type_idx" ON "transaction" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "transactions_status_idx" ON "transaction" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "transactions_created_at_idx" ON "transaction" USING btree ("created_at");
+CREATE INDEX "transactions_user_idx" ON "transactions" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "transactions_type_idx" ON "transactions" USING btree ("type");--> statement-breakpoint
+CREATE INDEX "transactions_status_idx" ON "transactions" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "transactions_created_at_idx" ON "transactions" USING btree ("created_at");
