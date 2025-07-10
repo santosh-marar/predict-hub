@@ -11,8 +11,8 @@ import userRoutes from "./routes/user";
 import categoryRoutes from "./routes/category";
 import subCategoryRoutes from "./routes/sub-category";
 import eventRoutes from "./routes/event";
-import orderBookRoute from "./routes/order-book";
 import orderRoute from "./routes/order"
+import walletRoute from "./routes/wallet";
 
 const app: Application = express();
 const PORT = process.env.PORT || 8080;
@@ -49,8 +49,8 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/sub-category", subCategoryRoutes);
 app.use("/api/v1/event", eventRoutes);
-app.use("/api/v1/order-book", orderBookRoute);
 app.use("/api/v1/order", orderRoute);
+app.use("/api/v1/wallet", walletRoute);
 
 // Start
 app.listen(PORT, () => {

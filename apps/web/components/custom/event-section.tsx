@@ -328,10 +328,16 @@ export default function EventsSection() {
                         </div>
                         <div className="flex gap-4 text-sm font-medium">
                           <button className="flex-1 bg-[#e8f2ff] text-[#197bff] rounded-md py-2">
-                            Yes @ {event.yesPrice || "N/A"}
+                            Yes @{" "}
+                            {event.lastYesPrice != null
+                              ? Number(event.lastYesPrice).toFixed(2)
+                              : "N/A"}
                           </button>
                           <button className="flex-1 bg-[#fdf3f2] text-[#dc2804] rounded-md py-2 transition">
-                            No @ {event.noPrice || "N/A"}
+                            No @{" "}
+                            {event.lastNoPrice != null
+                              ? Number(event.lastNoPrice).toFixed(2)
+                              : "N/A"}
                           </button>
                         </div>
                       </CardContent>

@@ -5,7 +5,7 @@ import {
   event,
   notification,
   position,
-  transaction,
+  transactions,
   user,
   wallet,
 } from "@repo/db";
@@ -103,8 +103,6 @@ export const getPositions = async (req: AuthRequest, res: Response) => {
         id: event.id,
         title: event.title,
         status: event.status,
-        yesPrice: event.yesPrice,
-        noPrice: event.noPrice,
         endTime: event.endTime,
       },
     })
@@ -120,89 +118,46 @@ export const getPositions = async (req: AuthRequest, res: Response) => {
   res.json({ positions });
 };
 
-export const getTransactions = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user?.id!;
-    const { type, limit = "50", offset = "0" } = req.query;
+// export const getTransactions = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const userId = req.user?.id!;
+//     const { type, limit = "50", offset = "0" } = req.query;
 
-    // Build where conditions array
-    const whereConditions = [eq(transaction.userId, userId)];
+//     // Build where conditions array
+//     const whereConditions = [eq(transactions.userId, userId)];
 
-    // Add type filter if provided and valid
-    if (type && typeof type === "string") {
-      const validTypes = [
-        "trade",
-        "deposit",
-        "withdrawal",
-        "payout",
-        "refund",
-        "bonus",
-      ] as const;
-      if (validTypes.includes(type as any)) {
-        whereConditions.push(
-          eq(transaction.type, type as (typeof validTypes)[number])
-        );
-      }
-    }
+//     // Add type filter if provided and valid
+//     if (type && typeof type === "string") {
+//       const validTypes = [
+//         "trade",
+//         "deposit",
+//         "withdrawal",
+//         "payout",
+//         "refund",
+//         "bonus",
+//       ] as const;
+//       if (validTypes.includes(type as any)) {
+//         whereConditions.push(
+//           eq(transactions.type, type as (typeof validTypes)[number])
+//         );
+//       }
+//     }
 
-    // Build the query with all conditions at once
-    const transactions = await db
-      .select()
-      .from(transaction)
-      .where(and(...whereConditions))
-      .orderBy(desc(transaction.createdAt))
-      .limit(parseInt(limit as string))
-      .offset(parseInt(offset as string));
+//     // Build the query with all conditions at once
+//     const transactions = await db
+//       .select()
+//       .from(transaction)
+//       .where(and(...whereConditions))
+//       .orderBy(desc(transaction.createdAt))
+//       .limit(parseInt(limit as string))
+//       .offset(parseInt(offset as string));
 
-    res.json({ transactions });
-  } catch (error) {
-    console.error("Get transactions error:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-export const getNotifications = asyncMiddleware(
-  async (req: AuthRequest, res: Response) => {
-    const userId = req.user?.id!;
-    const { unreadOnly = "false", limit = "50", offset = "0" } = req.query;
-
-    // Build where conditions array
-    const whereConditions = [eq(notification.userId, userId)];
-
-    if (unreadOnly === "true") {
-      whereConditions.push(eq(notification.isRead, false));
-    }
-
-    const notifications = await db
-      .select()
-      .from(notification)
-      .where(and(...whereConditions))
-      .orderBy(desc(notification.createdAt))
-      .limit(parseInt(limit as string))
-      .offset(parseInt(offset as string));
-
-    res.json({ notifications });
-  }
-);
-
-export const markNotificationsRead = asyncMiddleware(
-  async (req: AuthRequest, res: Response) => {
-    const userId = req.user?.id!;
-    const { notificationIds } = req.body;
-
-    await db
-      .update(notification)
-      .set({
-        isRead: true,
-        readAt: new Date(),
-      })
-      .where(
-        sql`${notification.userId} = ${userId} AND ${notification.id} = ANY(${notificationIds})`
-      );
-
-    res.json({ success: true });
-  }
-);
+//     res.json({ transactions });
+//   } catch (error) {
+//     console.error("Get transactions error:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 export const getLeaderboardPosition = asyncMiddleware(
   async (req: AuthRequest, res: Response) => {

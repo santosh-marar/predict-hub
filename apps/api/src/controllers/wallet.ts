@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { db, wallet, transaction, position } from "@repo/db";
+import { db, wallet, transactions, position } from "@repo/db";
 import { eq, desc, and, sql, sum, count } from "drizzle-orm";
 import { z } from "zod";
 import { AuthRequest } from "src/middleware/auth";
@@ -126,7 +126,7 @@ export const deposit = async (
 
     // Create transaction record
     const [newTransaction] = await db
-      .insert(transaction)
+      .insert(transactions)
       .values({
         userId,
         type: "deposit",
@@ -197,7 +197,7 @@ export const withdraw = async (
 
     // Create transaction record
     const [newTransaction] = await db
-      .insert(transaction)
+      .insert(transactions)
       .values({
         userId,
         type: "withdrawal",
@@ -233,78 +233,78 @@ export const withdraw = async (
 };
 
 // Get transaction history
-export const getTransactions = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const query = queryTransactionSchema.parse(req.query);
-    const userId = req.user?.id!;
-    const offset = (query.page - 1) * query.limit;
+// export const getTransactions = async (
+//   req: AuthRequest,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const query = queryTransactionSchema.parse(req.query);
+//     const userId = req.user?.id!;
+//     const offset = (query.page - 1) * query.limit;
 
-    if (!userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+//     if (!userId) {
+//       return res.status(401).json({ error: "Unauthorized" });
+//     }
 
-    // Build where conditions
-    const whereConditions = [eq(transaction.userId, userId)];
+//     // Build where conditions
+//     const whereConditions = [eq(transactions.userId, userId)];
 
-    if (query.type) {
-      whereConditions.push(eq(transaction.type, query.type));
-    }
-    if (query.status) {
-      whereConditions.push(eq(transaction.status, query.status));
-    }
-    if (query.dateFrom) {
-      whereConditions.push(sql`${transaction.createdAt} >= ${query.dateFrom}`);
-    }
-    if (query.dateTo) {
-      whereConditions.push(sql`${transaction.createdAt} <= ${query.dateTo}`);
-    }
+//     if (query.type) {
+//       whereConditions.push(eq(transaction.type, query.type));
+//     }
+//     if (query.status) {
+//       whereConditions.push(eq(transaction.status, query.status));
+//     }
+//     if (query.dateFrom) {
+//       whereConditions.push(sql`${transaction.createdAt} >= ${query.dateFrom}`);
+//     }
+//     if (query.dateTo) {
+//       whereConditions.push(sql`${transaction.createdAt} <= ${query.dateTo}`);
+//     }
 
-    const transactions = await db
-      .select({
-        id: transaction.id,
-        type: transaction.type,
-        amount: transaction.amount,
-        balanceBefore: transaction.balanceBefore,
-        balanceAfter: transaction.balanceAfter,
-        paymentMethod: transaction.paymentMethod,
-        paymentReference: transaction.paymentReference,
-        status: transaction.status,
-        description: transaction.description,
-        createdAt: transaction.createdAt,
-        completedAt: transaction.completedAt,
-      })
-      .from(transaction)
-      .where(and(...whereConditions))
-      .orderBy(desc(transaction.createdAt))
-      .limit(query.limit)
-      .offset(offset);
+//     const transactions = await db
+//       .select({
+//         id: transaction.id,
+//         type: transaction.type,
+//         amount: transaction.amount,
+//         balanceBefore: transaction.balanceBefore,
+//         balanceAfter: transaction.balanceAfter,
+//         paymentMethod: transaction.paymentMethod,
+//         paymentReference: transaction.paymentReference,
+//         status: transaction.status,
+//         description: transaction.description,
+//         createdAt: transaction.createdAt,
+//         completedAt: transaction.completedAt,
+//       })
+//       .from(transaction)
+//       .where(and(...whereConditions))
+//       .orderBy(desc(transaction.createdAt))
+//       .limit(query.limit)
+//       .offset(offset);
 
-    // Get total count
-    const [{ count: totalCount }] = await db
-      .select({ count: count() })
-      .from(transaction)
-      .where(and(...whereConditions));
+//     // Get total count
+//     const [{ count: totalCount }] = await db
+//       .select({ count: count() })
+//       .from(transaction)
+//       .where(and(...whereConditions));
 
-    res.json({
-      success: true,
-      data: {
-        transactions,
-        pagination: {
-          page: query.page,
-          limit: query.limit,
-          total: totalCount,
-          pages: Math.ceil(totalCount / query.limit),
-        },
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+//     res.json({
+//       success: true,
+//       data: {
+//         transactions,
+//         pagination: {
+//           page: query.page,
+//           limit: query.limit,
+//           total: totalCount,
+//           pages: Math.ceil(totalCount / query.limit),
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 // Get wallet statistics
 // export const getWalletStats = async (req: Request, res: Response, next: NextFunction) => {
@@ -451,171 +451,3 @@ export const createWallet = async (
     throw error;
   }
 };
-
-// Lock funds for order placement
-// export const lockFunds = asyncMiddleware(async (req: AuthRequest, res: Response) => {
-//     const { userId, amount } = req.body;
-//     const requestUserId = req.user?.id!;
-
-//     if (requestUserId !== userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: "Unauthorized",
-//       });
-//     }
-
-//     if (!amount || amount <= 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid amount",
-//       });
-//     }
-
-//     // Check if user has sufficient balance
-//     const userWallet = await db
-//       .select()
-//       .from(wallet)
-//       .where(eq(wallet.userId, userId))
-//       .limit(1);
-
-//     if (userWallet.length === 0) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Wallet not found",
-//       });
-//     }
-
-//     const availableBalance =
-//       parseFloat(userWallet[0].balance) -
-//       parseFloat(userWallet[0].lockedBalance);
-
-//     if (availableBalance < amount) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Insufficient balance",
-//       });
-//     }
-
-//     const updated = await updateWalletBalance(userId, amount, "lock");
-
-//     res.json({
-//       success: true,
-//       data: updated,
-//       message: "Funds locked successfully",
-//     });
-//   })
-
-// // Unlock funds (cancel order)
-// export const unlockFunds = asyncMiddleware( async (req: AuthRequest, res: Response) => {
-//     const { userId, amount } = req.body;
-//     const requestUserId = req.user?.id;
-
-//     if (requestUserId !== userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: "Unauthorized",
-//       });
-//     }
-
-//     if (!amount || amount <= 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid amount",
-//       });
-//     }
-
-//     const updated = await updateWalletBalance(userId, amount, "unlock");
-
-//     res.json({
-//       success: true,
-//       data: updated,
-//       message: "Funds unlocked successfully",
-//     });
-//   })
-
-// // Update PnL (internal use)
-// export const updatePnL = async (
-//   userId: string,
-//   pnlAmount: number,
-//   tx?: any
-// ) => {
-//   try {
-//     const dbInstance = tx || db;
-
-//     const updated = await dbInstance
-//       .update(wallet)
-//       .set({
-//         totalPnl: sql`${wallet.totalPnl} + ${pnlAmount}`,
-//         updatedAt: new Date(),
-//       })
-//       .where(eq(wallet.userId, userId))
-//       .returning();
-
-//     return updated[0];
-//   } catch (error) {
-//     console.error("Error updating PnL:", error);
-//     throw error;
-//   }
-// };
-
-// // Get wallet statistics
-// export const getWalletStats = async (req: Request, res: Response) => {
-//   try {
-//     const { userId } = req.params;
-//     const requestUserId = req.user?.id;
-
-//     if (requestUserId !== userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: "Unauthorized",
-//       });
-//     }
-
-//     const stats = await db
-//       .select({
-//         totalDeposited: wallet.totalDeposited,
-//         totalWithdrawn: wallet.totalWithdrawn,
-//         totalPnl: wallet.totalPnl,
-//         balance: wallet.balance,
-//         lockedBalance: wallet.lockedBalance,
-//       })
-//       .from(wallet)
-//       .where(eq(wallet.userId, userId))
-//       .limit(1);
-
-//     if (stats.length === 0) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Wallet not found",
-//       });
-//     }
-
-//     const walletData = stats[0];
-//     const totalValue = parseFloat(walletData.balance);
-//     const netProfit = parseFloat(walletData.totalPnl);
-//     const totalInvested =
-//       parseFloat(walletData.totalDeposited) -
-//       parseFloat(walletData.totalWithdrawn);
-
-//     res.json({
-//       success: true,
-//       data: {
-//         ...walletData,
-//         totalValue,
-//         netProfit,
-//         totalInvested,
-//         availableBalance: totalValue - parseFloat(walletData.lockedBalance),
-//         profitPercentage:
-//           totalInvested > 0
-//             ? ((netProfit / totalInvested) * 100).toFixed(2)
-//             : "0",
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Error fetching wallet stats:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to fetch wallet statistics",
-//     });
-//   }
-// };

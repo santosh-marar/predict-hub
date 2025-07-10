@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, signOut, useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import { Button } from "@repo/ui/components/button";
 import {
   DropdownMenu,
@@ -13,11 +13,38 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { handleSignIn, handleSignOut } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const pathname = usePathname();
   const session = useSession();
   const user = session?.data?.user;
+
+  const [wallet, setWallet] = useState();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v1/wallet/${user?.id}`,
+          {
+            credentials: "include",
+          }
+        );
+        const data = await response.json();
+        setWallet(data?.data);
+      } catch (error) {
+        console.error("Failed to fetch wallet:", error);
+      }
+    };
+
+    if (user?.id) {
+      fetchData();
+    }
+  }, [user?.id]);
+
+  // @ts-ignore
+  const userBalance = wallet?.balance;  
 
   if (user) {
     return (
@@ -89,7 +116,10 @@ export default function Header() {
                     width={20}
                     height={20}
                   />
-                  <span className="text-sm font-medium">₹15</span>
+                  {/* @ts-ignore */}
+                  <span className="text-sm font-medium">
+                    ₹ {Number(userBalance ?? 0).toFixed(2)}
+                  </span>
                 </span>
               </Button>
 
@@ -111,11 +141,11 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-48 h-13 shadow-md border-none flex p-0 rounded-xl"
+                  className="w-48 shadow-md border-none flex p-0 rounded-xl flex-col"
                 >
                   <DropdownMenuItem
                     onClick={handleSignOut}
-                    className="flex items-center gap-2 cursor-pointer w-full "
+                    className="flex items-center gap-2 cursor-pointer w-full h-13 "
                   >
                     <Image
                       src="/logout.svg"
@@ -128,7 +158,7 @@ export default function Header() {
                     </button>
                   </DropdownMenuItem>
                   {user?.role === "admin" && (
-                    <DropdownMenuItem>
+                    <DropdownMenuItem className="w-full h-10">
                       <Link href="/dashboard">Dashboard</Link>
                     </DropdownMenuItem>
                   )}

@@ -9,48 +9,73 @@ import { Input } from "@repo/ui/components/input";
 import { Minus, Plus, Settings } from "lucide-react";
 import api from "@/lib/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface EventFormData {
-  eventId: string;
   side: "yes" | "no";
-  limitPrice: number;
+  limitPrice?: number; // Make this optional
   quantity: number;
   type: "buy" | "sell";
+  orderType: "market" | "limit";
+  price?: number;
 }
 
-export default function TradingSidebar({eventId}: {eventId: string}) {
+interface TradingSidebarProps {
+  eventId: string;
+  lastYesPrice: number;
+  lastNoPrice: number;
+}
+
+export default function TradingSidebar({
+  eventId,
+  lastYesPrice,
+  lastNoPrice,
+}: TradingSidebarProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   const [selectedOption, setSelectedOption] = useState<"yes" | "no">("yes");
-  const [price, setPrice] = useState(9.5);
+  const [price, setPrice] = useState(
+    selectedOption === "yes" ? lastYesPrice : lastNoPrice
+  );
   const [quantity, setQuantity] = useState(1);
-  const [type, setType] = useState<"buy" | "sell">("buy");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const youPut = price * quantity;
+  // Update the calculation logic to use actual prices from props
+  const actualPrice = showAdvanced
+    ? price
+    : selectedOption === "yes"
+      ? lastYesPrice
+      : lastNoPrice;
+  const youPut = actualPrice * quantity;
   const youGet = selectedOption === "yes" ? 10.0 * quantity : 10.0 * quantity;
+  const potentialProfit = youGet - youPut;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData: EventFormData = {
+
+    const formData: any = {
       eventId: eventId,
       side: selectedOption,
-      limitPrice: price,
       quantity: quantity,
-      type: type,
+      type: selectedOption === "yes" ? "buy" : "sell",
+      orderType: showAdvanced ? "limit" : "market", // limit when advanced, market when not
+      limitPrice: showAdvanced ? price : undefined,
+      price: showAdvanced ? undefined : price,
     };
 
-    onSubmit({
-      ...formData,
-    });
+    // Only include limitPrice if advanced options are enabled (limit order)
+    if (showAdvanced) {
+      formData.limitPrice = Number(price);
+    }
+    
+    onSubmit(formData);
   };
 
   const mutation = useMutation({
     mutationFn: async (data: EventFormData) => {
-      const response = await api.post(`/order`, data);
+      const response = await api.post("/order", data);
       return response.data;
     },
     onSuccess: () => {
@@ -75,7 +100,7 @@ export default function TradingSidebar({eventId}: {eventId: string}) {
   const isLoading = mutation.isPending;
 
   return (
-    <Card className="sticky top-6 shadow-none h-full rounded-2xl mt-6">
+    <Card className="sticky top-6 shadow-none  rounded-2xl mt-6">
       <CardContent className="p-4 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* YES/NO Toggle */}
@@ -89,7 +114,7 @@ export default function TradingSidebar({eventId}: {eventId: string}) {
                   : "bg-white hover:bg-gray-200 text-gray-700"
               }`}
             >
-              Yes ₹9.5
+              Yes ₹{lastYesPrice}
             </Button>
             <Button
               type="button"
@@ -100,7 +125,7 @@ export default function TradingSidebar({eventId}: {eventId: string}) {
                   : "bg-white hover:bg-gray-200 text-gray-700"
               }`}
             >
-              No ₹0.5
+              No ₹{lastNoPrice}
             </Button>
           </div>
 
@@ -115,47 +140,8 @@ export default function TradingSidebar({eventId}: {eventId: string}) {
             </Button>
 
             <Card className="p-4 mt-2 shadow-none">
-              {/* Price Input */}
-              <div className="grid grid-cols-5 items-center space-y-2 gap-2 mb-4">
-                <div className="space-y-1 col-span-2">
-                  <label className="text-sm font-medium">Price</label>
-                  <p className="text-xs text-gray-500">0 qty available</p>
-                </div>
-
-                <div className="flex col-span-3 items-center border rounded-xl h-8 overflow-hidden p-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-6 w-6 p-0 rounded-xl hover:text-blue-600 border-none focus:outline-none bg-[#f5f5f5]"
-                    onClick={() => setPrice(Math.max(0.5, price - 0.5))}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <Input
-                    type="number"
-                    value={price}
-                    onChange={(e) =>
-                      setPrice(Number.parseFloat(e.target.value) || 0)
-                    }
-                    step="0.5"
-                    min="0.5"
-                    className="border-0 text-center font-medium h-8 px-1 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-6 w-6 p-0 rounded-xl hover:text-blue-600 border-none focus:outline-none bg-[#f5f5f5]"
-                    onClick={() => setPrice(price + 0.5)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
               {/* Quantity Input */}
-              <div className="grid grid-cols-5 items-center space-y-2 gap-2 mb-4">
+              <div className="grid grid-cols-5 items-center space-y-2 gap-2">
                 <div className="space-y-1 col-span-2 flex items-center gap">
                   <label className="text-sm font-medium">Quantity</label>
                   <Settings className="h-4 w-4 text-gray-500" />
@@ -193,17 +179,88 @@ export default function TradingSidebar({eventId}: {eventId: string}) {
                 </div>
               </div>
 
-              {/* Summary */}
-              <div className="flex justify-around">
-                <div className="text-center">
-                  <div className="font-semibold">₹{youPut.toFixed(1)}</div>
-                  <div className="text-sm text-gray-500">You put</div>
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold text-green-600">
-                    ₹{youGet.toFixed(1)}
+              {/* Advanced Options Toggle */}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="w-full justify-between p-0 h-auto text-gray-600 hover:text-gray-900 mb-1"
+              >
+                Advanced Options
+                <Plus
+                  className={`h-4 w-4 transition-transform ${showAdvanced ? "rotate-45" : ""}`}
+                />
+              </Button>
+
+              {/* Advanced Price Input - Only show when advanced options are enabled */}
+              {showAdvanced && (
+                <div className="grid grid-cols-5 items-center gap-2 p-1 bg-gray-50 rounded-lg">
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-sm font-medium">Limit Price</label>
+                    <p className="text-xs text-gray-500">Set exact price</p>
                   </div>
-                  <div className="text-sm text-gray-500">You get</div>
+
+                  <div className="flex col-span-3 items-center border rounded-xl h-8 overflow-hidden p-2 bg-white">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-6 w-6 p-0 rounded-xl hover:text-blue-600 border-none focus:outline-none bg-[#f5f5f5]"
+                      onClick={() => setPrice(Math.max(0.1, price - 0.1))}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <Input
+                      type="number"
+                      value={price}
+                      onChange={(e) =>
+                        setPrice(Number.parseFloat(e.target.value) || 0)
+                      }
+                      step="0.1"
+                      min="0.1"
+                      max="10"
+                      className="border-0 text-center font-medium h-8 px-1 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-6 w-6 p-0 rounded-xl hover:text-blue-600 border-none focus:outline-none bg-[#f5f5f5]"
+                      onClick={() => setPrice(Math.min(10, price + 0.1))}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Summary */}
+              <div className="space-y-3">
+                <div className="flex justify-around">
+                  <div className="text-center">
+                    <div className="font-semibold">₹{youPut.toFixed(1)}</div>
+                    <div className="text-sm text-gray-500">You put</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-green-600">
+                      ₹{youGet.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-gray-500">You get</div>
+                  </div>
+                </div>
+
+                <div className="text-center p-2 bg-gray-50 rounded-lg">
+                  <div className="text-sm text-gray-600">
+                    {showAdvanced ? "Limit Order" : "Market Order"}
+                  </div>
+                  <div
+                    className={`font-semibold ${potentialProfit > 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    Potential Profit: ₹{potentialProfit.toFixed(1)}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Price: ₹{actualPrice} × {quantity} qty
+                  </div>
                 </div>
               </div>
 

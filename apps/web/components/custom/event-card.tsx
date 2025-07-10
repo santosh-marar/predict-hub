@@ -28,8 +28,8 @@ export interface Event {
   totalVolume: string; // stored as string for precision (e.g. "0.00")
   totalYesShares: string;
   totalNoShares: string;
-  yesPrice: string;
-  noPrice: string;
+  lastYesPrice: string;
+  lastNoPrice: string;
   isPublic: boolean;
   isFeatured: boolean;
   createdAt: string; // ISO date string
@@ -100,10 +100,10 @@ const EventCard = ({ events, filterExpiresInMinutes }: EventCardProps) => {
                 </div>
                 <div className="flex gap-4 text-sm font-medium">
                   <button className="flex-1 bg-[#e8f2ff] text-[#197bff] rounded-md py-2">
-                    Yes @ {event.yesPrice || "N/A"}
+                    Yes @ {event.lastYesPrice || "N/A"}
                   </button>
                   <button className="flex-1 bg-[#fdf3f2] text-[#dc2804] rounded-md py-2 transition">
-                    No @ {event.noPrice || "N/A"}
+                    No @ {event.lastNoPrice || "N/A"}
                   </button>
                 </div>
               </CardContent>

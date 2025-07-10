@@ -85,6 +85,8 @@ export default function EventDetails() {
     startTime,
     endTime,
     eventOverviewAndStatistics,
+    lastYesPrice,
+    lastNoPrice,
     isPublic: isPublicBool,
     isFeatured: isFeaturedBool,
     imageUrl: imageUrlString,
@@ -279,7 +281,7 @@ export default function EventDetails() {
       {/* Download App Section - Right Sidebar */}
       {session?.data ? (
         <div className="w-96 flex-shrink-0">
-          <TradingSidebar eventId={eventId as string} />
+          <TradingSidebar eventId={eventId as string} lastYesPrice={lastYesPrice} lastNoPrice={lastNoPrice} />
         </div>
       ) : (
         <div className="w-96 flex-shrink-0">
