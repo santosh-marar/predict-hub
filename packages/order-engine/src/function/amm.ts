@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 import { insertTradeRecord } from "./trade";
 import { TAKER_FEE_RATE } from "@/constants";
-import { wallet } from "@repo/db";
+import { event, order, wallet } from "@repo/db";
 import { TradeExecution } from "@/types";
 import { eq } from "drizzle-orm";
 import { upsertUserPosition } from "./position";
@@ -14,7 +14,7 @@ export async function executeAMMTrade(
   tx: any,
   newOrder: any,
   eventData: any,
-  remainingQuantity: Decimal
+  remainingQuantity: any
 ): Promise<TradeExecution | null> {
   // Get current AMM price based on side
   const currentPrice =
@@ -79,11 +79,84 @@ export async function executeAMMTrade(
   // 3. Insert transaction record
   await createTransactionRecordAMM(tx, newOrder, ammTradeExecution);
 
-  // Todo: After tarde calculate new AMM price after trade (simple bonding curve)
+  // 4. Calculate new AMM price after trade
+  const { newYesPrice, newNoPrice, newYesShares, newNoShares } =
+    calculateNewPriceAfterTrade(
+      eventData.totalYesShares,
+      eventData.totalNoShares,
+      newOrder.side,
+      remainingQuantity
+    );
 
-  // Todo: Update both parties user wallet
+  // 5. Update event data
+  await tx
+    .update(event)
+    .set({
+      totalYesShares: newYesShares,
+      totalNoShares: newNoShares,
+      lastYesPrice: newYesPrice,
+      lastNoPrice: newNoPrice,
+    })
+    .where(eq(event.id, eventData.id));
 
-  // Todo: Update order fill status & remaining quantity and status & filled quantity & average fill price & fees & total fees  & filled at
+  // 6. Update order status
+  await tx
+    .update(order)
+    .set({
+      status: "filled",
+      filledQuantity: newOrder.originalQuantity, 
+      averageFillPrice: parseFloat(
+        (
+          Number(ammTradeExecution.totalFees) /
+          Number(newOrder.originalQuantity)
+        ).toFixed(4)
+      ),
+      fees: parseFloat(
+        (
+          Number(ammTradeExecution.totalFees) - Number(ammTradeExecution.amount)
+        ).toFixed(4)
+      ),
+      totalFees: ammTradeExecution.totalFees, 
+      filledAt: new Date(),
+      remainingQuantity: 0,
+    })
+    .where(eq(order.id, newOrder.id));
+
+  // Todo: Update taker wallet
 
   return ammTradeExecution;
+}
+
+// Function to calculate new AMM price after trade
+export function calculateNewPriceAfterTrade(
+  currentYesShares: number,
+  currentNoShares: number,
+  tradeSide: string,
+  tradeQuantity: number
+) {
+  const k = currentYesShares * currentNoShares;
+
+  let newYesShares, newNoShares;
+
+  if (tradeSide === "yes") {
+    newYesShares = currentYesShares - tradeQuantity;
+    newNoShares = Math.floor(k / newYesShares);
+  } else {
+    newNoShares = currentNoShares - tradeQuantity;
+    newYesShares = Math.floor(k / newNoShares);
+  }
+
+  const totalShares = newYesShares + newNoShares;
+  const newYesPrice = Math.max(
+    0.5,
+    Math.min(9.5, (newNoShares / totalShares) * 10)
+  );
+  const newNoPrice = 10 - newYesPrice;
+
+  return {
+    newYesPrice,
+    newNoPrice,
+    newYesShares,
+    newNoShares,
+  };
 }

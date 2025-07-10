@@ -53,21 +53,6 @@ export async function createTransactionRecordAMM(
 ): Promise<void> {
   const amount = new Decimal(tradeExecution.amount);
 
-  console.log("totalFees", tradeExecution.totalFees);
-
-  console.log("About to insert:", {
-    userId: takerOrder.userId,
-    relatedOrderId: tradeExecution.takerOrderId,
-    relatedEventId: takerOrder.eventId,
-    type: takerOrder.type === "buy" ? "buy" : "sell",
-    amount: amount.toString(),
-    takerFees: tradeExecution.takerFee,
-    totalFees: tradeExecution.totalFees,
-    status: "COMPLETED",
-    balanceBefore: tradeExecution.balanceBefore,
-    balanceAfter: tradeExecution.balanceAfter,
-  });
-
  try{
     await tx.insert(transactions).values({
       userId: takerOrder.userId,
