@@ -52,7 +52,7 @@ export const order = pgTable(
       .notNull(),
     timeInForce: text("time_in_force", { enum: ["GTC", "IOC", "FOK"] })
       .default("GTC")
-      .notNull(), // Good Till Cancel, Immediate or Cancel, Fill or Kill
+      .notNull(), 
     expiresAt: timestamp("expires_at"),
 
     // Execution tracking
@@ -68,7 +68,6 @@ export const order = pgTable(
     userIdx: index("orders_user_idx").on(table.userId),
     eventIdx: index("orders_event_idx").on(table.eventId),
     statusIdx: index("orders_status_idx").on(table.status),
-    // Critical index for order matching
     eventSideTypePrice: index("orders_matching_idx").on(
       table.eventId,
       table.side,

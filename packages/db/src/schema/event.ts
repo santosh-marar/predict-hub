@@ -43,13 +43,13 @@ export const event = pgTable(
 
     // Trading mechanics
     totalVolume: decimal("total_volume")
-      .default("10000")
+      .default("1000")
       .notNull(),
     totalYesShares: decimal("total_yes_shares")
-      .default("5000")
+      .default("500")
       .notNull(),
     totalNoShares: decimal("total_no_shares")
-      .default("5000")
+      .default("500")
       .notNull(),
 
     // Current prices (0-10)
