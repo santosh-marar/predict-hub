@@ -18,6 +18,7 @@ export async function createTransactionRecords(
   await tx.insert(transactions).values({
     userId: takerOrder.userId,
     eventId: takerOrder.eventId,
+    side: takerOrder.side,
     type: takerOrder.type === "buy" ? "buy" : "sell",
     amount: amount.toString(),
     takerFees: tradeExecution.takerFee.toString(),
@@ -32,6 +33,7 @@ export async function createTransactionRecords(
   await tx.insert(transactions).values({
     userId: makerOrder.userId,
     eventId: makerOrder.eventId,
+    side: makerOrder.side,
     type: makerOrder.type === "buy" ? "buy" : "sell",
     amount: amount.toString(),
     makerFees: makerFee,
@@ -58,6 +60,7 @@ export async function createTransactionRecordAMM(
       userId: takerOrder.userId,
       relatedOrderId: tradeExecution.takerOrderId,
       relatedEventId: takerOrder.eventId,
+      side: takerOrder.side,
       type: takerOrder.type === "buy" ? "buy" : "sell",
       amount: amount.toString(),
       takerFees: tradeExecution.takerFee,

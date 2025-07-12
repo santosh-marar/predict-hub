@@ -15,6 +15,7 @@ export async function insertTradeRecord(
     takerOrderId: tradeExecution.takerOrderId,
     eventId: tradeExecution.eventId,
     side: tradeExecution.side,
+    type: tradeExecution.type,
     quantity: tradeExecution.quantity,
     price: tradeExecution.price,
     amount: tradeExecution.amount,

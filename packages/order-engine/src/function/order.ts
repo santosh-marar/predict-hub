@@ -1,6 +1,6 @@
 import { DEFAULT_SLIPPAGE_TOLERANCE, TAKER_FEE_RATE } from "@/constants";
 import { OrderData } from "@/types";
-import { eq, order, wallet } from "@repo/db";
+import { order } from "@repo/db";
 import Decimal from "decimal.js";
 
 /**

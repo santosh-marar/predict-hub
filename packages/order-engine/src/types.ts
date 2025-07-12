@@ -9,6 +9,7 @@ export interface TradeExecution {
   makerOrderId?: string;
   takerOrderId: string;
   side: "yes" | "no";
+  type: "buy" | "sell";
   quantity: Number;
   price: Decimal;
   amount: Decimal;

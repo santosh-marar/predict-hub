@@ -59,6 +59,7 @@ export async function executeAMMTrade(
     makerUserId: "amm-bot",
     eventId: newOrder.eventId,
     side: newOrder.side,
+    type: newOrder.type,
     quantity: Number(remainingQuantity),
     price: ammPrice,
     amount: tradeAmount,
@@ -145,10 +146,11 @@ export function calculateNewPriceAfterTrade(
 
   if (tradeSide === "yes") {
     newYesShares = currentYesShares - tradeQuantity;
-    newNoShares = Math.floor(k / newYesShares);
+    newNoShares = Number(currentNoShares) + Number(tradeQuantity);
   } else {
     newNoShares = currentNoShares - tradeQuantity;
-    newYesShares = Math.floor(k / newNoShares);
+    newYesShares = Number(currentYesShares) + Number(tradeQuantity);
+    // newYesShares = Math.floor(k / newNoShares);
   }
 
   const totalShares = newYesShares + newNoShares;

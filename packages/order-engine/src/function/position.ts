@@ -18,7 +18,8 @@ export async function upsertUserPosition(
       and(
         eq(position.userId, positionData.takerUserId),
         eq(position.eventId, positionData.eventId),
-        eq(position.side, positionData.side)
+        eq(position.side, positionData.side),
+        eq(position.type, positionData.type)
       )
     )
     .limit(1);
@@ -54,6 +55,7 @@ export async function upsertUserPosition(
       userId: positionData.takerUserId,
       eventId: positionData.eventId,
       side: positionData.side,
+      type: positionData.type,
       shares: positionData.quantity.toString(),
       totalInvested: positionData.totalFees.toString(),
       averagePrice: new Decimal(positionData.totalFees)
