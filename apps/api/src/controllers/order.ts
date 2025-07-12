@@ -1,18 +1,31 @@
 import { Request, Response, NextFunction } from "express";
-import {
-  db,
-  order,
-  event,
-  position,
-  trade,
-  wallet,
-  transactions,
-} from "@repo/db";
-import { eq, desc, asc, and, or, sql, lt, gt, gte, lte } from "drizzle-orm";
+import { db, order, event } from "@repo/db";
+import { eq, desc, and, asc, or } from "drizzle-orm";
 import { z } from "zod";
 import { AuthRequest } from "src/middleware/auth";
 import asyncMiddleware from "src/middleware/async-middleware";
 import { placeOrder } from "@repo/order-engine";
+
+// Types for order book
+export interface OrderBookEntry {
+  price: string;
+  quantity: string;
+  orders: number;
+  side: "yes" | "no";
+  type: "limit" | "amm" | "market";
+}
+// Order book types
+export interface OrderBook {
+  eventId: string;
+  yesAsks: OrderBookEntry[];
+  yesBids: OrderBookEntry[];
+  noAsks: OrderBookEntry[];
+  noBids: OrderBookEntry[];
+  totalYesVolume: string;
+  totalNoVolume: string;
+  lastYesPrice?: string;
+  lastNoPrice?: string;
+}
 
 // Validation schemas
 const createOrderSchema = z.object({
@@ -21,7 +34,7 @@ const createOrderSchema = z.object({
   type: z.enum(["buy", "sell"]),
   orderType: z.enum(["market", "limit"]).default("market"),
   quantity: z.number().positive(),
-  price: z.string().min(0.5).max(9.5).optional(),
+  price: z.number().min(0.5).max(9.5).optional(),
   limitPrice: z.number().min(0.5).max(9.5).optional(),
 });
 
@@ -60,7 +73,7 @@ export const createOrder = asyncMiddleware(
     }
 
     const totalQuantity = String(validatedData.quantity);
-    const limitPrice = validatedData.limitPrice
+    const limitPrice = validatedData.limitPrice;
     const price = Number(validatedData.price);
 
     // Start creating order to finishing order
@@ -141,3 +154,117 @@ export const getUserOrders = asyncMiddleware(
     });
   }
 );
+
+export async function getOrderBook(eventId: string): Promise<OrderBook> {
+  try {
+    // Get only active limit orders table
+    const activeOrders = await db
+      .select()
+      .from(order)
+      .where(
+        and(
+          eq(order.eventId, eventId),
+          eq(order.status, "pending"),
+          eq(order.orderType, "limit") // Only limit orders
+        )
+      )
+      .orderBy(asc(order.createdAt));
+
+    // Separate orders by side
+    const yesOrders = activeOrders.filter((o) => o.side === "yes");
+    const noOrders = activeOrders.filter((o) => o.side === "no");
+
+    // Further separate by buy/sell means type
+    const yesBuyLimitOrders = yesOrders.filter((o) => o.type === "buy");
+    const yesSellLimitOrders = yesOrders.filter((o) => o.type === "sell");
+
+    const noBuyLimitOrders = noOrders.filter((o) => o.type === "buy");
+    const noSellLimitOrders = noOrders.filter((o) => o.type === "sell");
+
+    // Limit order book entries
+    const buildLimitOrderBookEntries = (
+      orders: typeof activeOrders,
+      isAsk: boolean
+    ) => {
+      const priceMap = new Map<string, { quantity: string; orders: number }>();
+
+      orders.forEach((order) => {
+        if (!order.limitPrice) return;
+
+        const price = order.limitPrice;
+        const existing = priceMap.get(price);
+
+        if (existing) {
+          existing.quantity = (
+            parseFloat(existing.quantity) + parseFloat(order.remainingQuantity)
+          ).toString();
+          existing.orders += 1;
+        } else {
+          priceMap.set(price, {
+            quantity: order.remainingQuantity,
+            orders: 1,
+          });
+        }
+      });
+
+      const entries = Array.from(priceMap.entries()).map(([price, data]) => ({
+        price,
+        quantity: data.quantity,
+        orders: data.orders,
+        side: orders[0]?.side || "yes",
+        type: "limit" as const,
+      }));
+
+      // Sort: asks ascending, bids descending
+      return entries.sort((a, b) => {
+        const priceA = parseFloat(a.price);
+        const priceB = parseFloat(b.price);
+        return isAsk ? priceA - priceB : priceB - priceA;
+      });
+    };
+
+    // Process limit orders
+    const yesAsks = buildLimitOrderBookEntries(yesSellLimitOrders, true);
+    const yesBids = buildLimitOrderBookEntries(yesBuyLimitOrders, false);
+    const noAsks = buildLimitOrderBookEntries(noSellLimitOrders, true);
+    const noBids = buildLimitOrderBookEntries(noBuyLimitOrders, false);
+
+    // Calculate total volumes
+    const calculateVolume = (entries: OrderBookEntry[]) => {
+      return entries.reduce(
+        (sum, entry) => sum + parseFloat(entry.quantity),
+        0
+      );
+    };
+
+    const totalYesVolume = calculateVolume([...yesAsks, ...yesBids]);
+    const totalNoVolume = calculateVolume([...noAsks, ...noBids]);
+
+    const events = await db.select().from(event).where(eq(event.id, eventId));
+
+
+    const result = {
+      eventId,
+      yesAsks,
+      yesBids,
+      noAsks,
+      noBids,
+      totalYesVolume: totalYesVolume.toString(),
+      totalNoVolume: totalNoVolume.toString(),
+      lastYesPrice: events[0].lastYesPrice,
+      lastNoPrice: events[0].lastNoPrice,
+    };
+
+    return result;
+  } catch (error: any) {
+    console.error("Error getting order book:", error);
+    throw new Error("Failed to get order book: " + error.message);
+  }
+}
+
+// Testing
+const result = await getOrderBook("8c6ad740-0957-4764-85b2-7a08113a311a");
+console.log("Final result:", result);
+// console.log("Final result no asks", result.raw.noAsks);
+// console.log("Final result yes asks", result.raw?.yesBids);
+
