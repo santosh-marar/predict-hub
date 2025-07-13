@@ -20,8 +20,8 @@
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
     "@repo/db": "workspace:*",
-    "@repo/types": "workspace:*",
     "@repo/order-engine": "workspace:*",
+    "@repo/types": "workspace:*",
     "better-auth": "^1.2.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -31,6 +31,7 @@
     "morgan": "^1.10.0",
     "rimraf": "^6.0.1",
     "slug": "^11.0.0",
+    "socket.io": "^4.8.1",
     "winston": "^3.17.0",
     "zod": "^3.24.4"
   },
@@ -47,5 +48,9 @@
     "tsup": "^8.4.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.9",
+    "utf-8-validate": "^6.0.5"
   }
 }

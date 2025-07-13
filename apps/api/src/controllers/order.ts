@@ -21,8 +21,8 @@ export interface OrderBook {
   yesBids: OrderBookEntry[];
   noAsks: OrderBookEntry[];
   noBids: OrderBookEntry[];
-  totalYesVolume: string;
-  totalNoVolume: string;
+  totalYesShares: string;
+  totalNoShares: string;
   lastYesPrice?: string;
   lastNoPrice?: string;
 }
@@ -229,18 +229,10 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
     const noAsks = buildLimitOrderBookEntries(noSellLimitOrders, true);
     const noBids = buildLimitOrderBookEntries(noBuyLimitOrders, false);
 
-    // Calculate total volumes
-    const calculateVolume = (entries: OrderBookEntry[]) => {
-      return entries.reduce(
-        (sum, entry) => sum + parseFloat(entry.quantity),
-        0
-      );
-    };
-
-    const totalYesVolume = calculateVolume([...yesAsks, ...yesBids]);
-    const totalNoVolume = calculateVolume([...noAsks, ...noBids]);
 
     const events = await db.select().from(event).where(eq(event.id, eventId));
+    const totalYesShares=events[0].totalYesShares;
+    const totalNoShares=events[0].totalNoShares;
 
 
     const result = {
@@ -249,8 +241,8 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
       yesBids,
       noAsks,
       noBids,
-      totalYesVolume: totalYesVolume.toString(),
-      totalNoVolume: totalNoVolume.toString(),
+      totalYesShares: totalYesShares.toString(),
+      totalNoShares: totalNoShares.toString(),
       lastYesPrice: events[0].lastYesPrice,
       lastNoPrice: events[0].lastNoPrice,
     };
