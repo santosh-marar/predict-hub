@@ -58,7 +58,7 @@ export default function OrderBookActivityTab() {
                     <div className="col-span-19 bg-blue-100 text-blue-700 pl-2 py-2 text-sm font-medium text rounded-l-lg">
                       {activity.leftPrice}
                     </div>
-                    <div className="col-span-1 bg-red-100 text-red-700 pr-2  pr-6 py-2 text-sm font-medium text-left rounded-r-lg">
+                    <div className="col-span-1 bg-red-100 text-red-700 pr-6 py-2 text-sm font-medium text-left rounded-r-lg">
                       {activity.rightPrice}
                     </div>
                   </div>

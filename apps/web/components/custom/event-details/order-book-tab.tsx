@@ -1,19 +1,94 @@
+// @ts-nocheck
 "use client";
 
 import { useState } from "react";
 import { Card, CardContent } from "@repo/ui/components/card";
 import OrderBookActivityTab from "./activity-tab";
+import { useOrderBook } from "@/hooks/use-order-book";
 
-export default function OrderBookTabs() {
-  const [subTab, setSubTab] = useState("activity");
+interface OrderBookProps {
+  eventId: string;
+  userId: string;
+}
 
-  const orderBookData = [
-    { price: 0.5, qtyNo: 53464 },
-    { price: 1, qtyNo: 220574, highlighted: true },
-    { price: 1.5, qtyNo: 20284 },
-    { price: 2, qtyNo: 40197 },
-    { price: 2.5, qtyNo: 20309 },
-  ];
+interface OrderBookEntry {
+  price: string;
+  quantity: string;
+  orders: number;
+  side: string;
+  type: string;
+  isAsk?: boolean;
+}
+
+export default function OrderBookTabs({ eventId, userId }: OrderBookProps) {
+  const [subTab, setSubTab] = useState("orderbook");
+
+  const {
+    orderBookData: realOrderBookData,
+    isSubscribed,
+    isConnected,
+    error,
+    unsubscribeFromOrderBook,
+  } = useOrderBook(eventId, userId);
+
+  console.log("realOrderBookData", realOrderBookData);
+
+  // Process the real order book data to always to show 5 rows only
+  const processOrderBookData = () => {
+    if (!realOrderBookData) {
+      return {
+        yesOrders: Array(5).fill({ price: 0, quantity: 0, isAsk: false }),
+        noOrders: Array(5).fill({ price: 0, quantity: 0, isAsk: false }),
+      };
+    }
+
+    // Combine and process YES orders (bids and asks)
+    const yesOrdersData = [
+      ...realOrderBookData.yesBids.map((order: OrderBookEntry) => ({
+        price: Number.parseFloat(order.price),
+        quantity: Number.parseFloat(order.quantity),
+        isAsk: false,
+      })),
+      ...realOrderBookData.yesAsks.map((order: OrderBookEntry) => ({
+        price: Number.parseFloat(order.price),
+        quantity: Number.parseFloat(order.quantity),
+        isAsk: true,
+      })),
+    ].sort((a, b) => b.price - a.price);
+
+    // Combine and process NO orders (bids and asks)
+    const noOrdersData = [
+      ...realOrderBookData.noBids.map((order: OrderBookEntry) => ({
+        price: Number.parseFloat(order.price),
+        quantity: Number.parseFloat(order.quantity),
+        isAsk: false,
+      })),
+      ...realOrderBookData.noAsks.map((order: OrderBookEntry) => ({
+        price: Number.parseFloat(order.price),
+        quantity: Number.parseFloat(order.quantity),
+        isAsk: true,
+      })),
+    ].sort((a, b) => b.price - a.price);
+
+    // Always return 5 rows, fill "0" if there is no data
+    const yesOrders = Array(5)
+      .fill(null)
+      .map(
+        (_, index) =>
+          yesOrdersData[index] || { price: "0", quantity: "0", isAsk: false }
+      );
+
+    const noOrders = Array(5)
+      .fill(null)
+      .map(
+        (_, index) =>
+          noOrdersData[index] || { price: "0", quantity: "0", isAsk: false }
+      );
+
+    return { yesOrders, noOrders };
+  };
+
+  const { yesOrders, noOrders } = processOrderBookData();
 
   return (
     <Card className="shadow-none border border-gray-200 p-0">
@@ -34,7 +109,7 @@ export default function OrderBookTabs() {
             className={`px-6 py-2 text-sm border-b-2 ${
               subTab === "activity"
                 ? "text-[#262626] font-semibold border-gray-900"
-                : "text-gray-500 border-transparent  hover:text-gray-700"
+                : "text-gray-500 border-transparent hover:text-gray-700"
             }`}
             onClick={() => setSubTab("activity")}
           >
@@ -55,24 +130,31 @@ export default function OrderBookTabs() {
                   <span className="text-sm font-medium text-[#262626]">
                     PRICE
                   </span>
-                  <span className="text-sm ">
-                    QTY AT {""}
+                  <span className="text-sm">
+                    QTY AT{" "}
                     <span className="font-semibold text-blue-600">YES</span>
                   </span>
                 </div>
                 <div className="">
-                  {orderBookData.map((item, index) => (
+                  {yesOrders.map((item, index) => (
                     <div
                       key={`yes-${index}`}
-                      className={`flex justify-between items-center py-2 rounded border-b
-                  ${item.highlighted ? "bg-blue-50" : ""} last:border-b-0`}
+                      className={`flex justify-between items-center py-2 rounded border-b last:border-b-0 ${
+                        item.quantity > 0
+                          ? item.isAsk
+                            ? "bg-red-50"
+                            : "bg-blue-50"
+                          : ""
+                      }`}
                     >
                       <span className="text-sm text-[#262626]">
-                        {item.price}
+                        {item.price > 0 ? Number(item.price).toFixed(2) : "0"}
                       </span>
                       <span className="text-sm text-[#262626]">
-                        {item.qtyNo.toLocaleString()}
-                      </span>{" "}
+                        {item.quantity > 0
+                          ? Number(item.quantity).toLocaleString()
+                          : "0"}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -85,23 +167,29 @@ export default function OrderBookTabs() {
                     PRICE
                   </span>
                   <span className="text-sm">
-                    QTY AT {""}
-                    <span className="font-semibold text-red-600">YES</span>
+                    QTY AT{" "}
+                    <span className="font-semibold text-red-600">NO</span>
                   </span>
                 </div>
                 <div className="">
-                  {orderBookData.map((item, index) => (
+                  {noOrders.map((item, index) => (
                     <div
                       key={`no-${index}`}
-                      className={`flex justify-between items-center py-2 rounded border-b ${
-                        item.highlighted ? "bg-red-50" : ""
-                      } last:border-b-0`}
+                      className={`flex justify-between items-center py-2 rounded border-b last:border-b-0 ${
+                        item.quantity > 0
+                          ? item.isAsk
+                            ? "bg-red-50"
+                            : "bg-blue-50"
+                          : ""
+                      }`}
                     >
                       <span className="text-sm text-[#262626]">
-                        {item.price}
+                        {item.price > 0 ? Number(item.price).toFixed(2) : "0"}
                       </span>
                       <span className="text-sm text-[#262626]">
-                        {item.qtyNo.toLocaleString()}
+                        {item.quantity > 0
+                          ? Number(item.quantity).toLocaleString()
+                          : "0"}
                       </span>
                     </div>
                   ))}

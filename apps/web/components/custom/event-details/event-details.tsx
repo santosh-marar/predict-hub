@@ -149,7 +149,7 @@ export default function EventDetails() {
         {/* Orderbook Section */}
         {session?.data && (
           <section id="orderbook" className="space-y-6 mb-8">
-            <OrderBookTabs />
+            <OrderBookTabs eventId={eventId as string} userId={session?.data?.userId} />
           </section>
         )}
 
@@ -281,7 +281,7 @@ export default function EventDetails() {
       {/* Download App Section - Right Sidebar */}
       {session?.data ? (
         <div className="w-96 flex-shrink-0">
-          <TradingSidebar eventId={eventId as string} lastYesPrice={lastYesPrice} lastNoPrice={lastNoPrice} />
+          <TradingSidebar eventId={eventId as string} />
         </div>
       ) : (
         <div className="w-96 flex-shrink-0">

@@ -11,29 +11,34 @@ import api from "@/lib/axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
+import { useOrderBook } from "@/hooks/use-order-book";
 
 interface EventFormData {
   side: "yes" | "no";
   limitPrice?: number; // Make this optional
   quantity: number;
-  type: "buy" | "sell";
+  type: "buy" 
   orderType: "market" | "limit";
   price?: number;
 }
 
 interface TradingSidebarProps {
   eventId: string;
-  lastYesPrice: number;
-  lastNoPrice: number;
 }
 
 export default function TradingSidebar({
   eventId,
-  lastYesPrice,
-  lastNoPrice,
 }: TradingSidebarProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const session = useSession();
+
+  const {  orderBookData,  } = useOrderBook(eventId, session?.data?.userId);
+  // @ts-ignore
+  const lastYesPrice = orderBookData?.lastYesPrice;
+  // @ts-ignore
+  const lastNoPrice = orderBookData?.lastNoPrice;
 
   const [selectedOption, setSelectedOption] = useState<"yes" | "no">("yes");
   const [price, setPrice] = useState(
@@ -59,16 +64,18 @@ export default function TradingSidebar({
       eventId: eventId,
       side: selectedOption,
       quantity: quantity,
-      type: selectedOption === "yes" ? "buy" : "sell",
+      type: "buy",
       orderType: showAdvanced ? "limit" : "market", // limit when advanced, market when not
       limitPrice: showAdvanced ? price : undefined,
-      price: showAdvanced ? undefined : price,
+      price: showAdvanced ? undefined : Number(price),
     };
 
     // Only include limitPrice if advanced options are enabled (limit order)
     if (showAdvanced) {
       formData.limitPrice = Number(price);
     }
+
+    console.log(formData);
     
     onSubmit(formData);
   };
@@ -114,7 +121,7 @@ export default function TradingSidebar({
                   : "bg-white hover:bg-gray-200 text-gray-700"
               }`}
             >
-              Yes ₹{lastYesPrice}
+              Yes ₹{Number(lastYesPrice).toFixed(2)}
             </Button>
             <Button
               type="button"
@@ -125,7 +132,7 @@ export default function TradingSidebar({
                   : "bg-white hover:bg-gray-200 text-gray-700"
               }`}
             >
-              No ₹{lastNoPrice}
+              No ₹{Number(lastNoPrice).toFixed(2)}
             </Button>
           </div>
 
@@ -165,6 +172,7 @@ export default function TradingSidebar({
                     }
                     step="1"
                     min={1}
+                    max={9000}
                     className="border-0 text-center font-medium h-8 px-1 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none"
                   />
                   <Button
@@ -212,13 +220,13 @@ export default function TradingSidebar({
                     </Button>
                     <Input
                       type="number"
-                      value={price}
+                      value={price }
                       onChange={(e) =>
                         setPrice(Number.parseFloat(e.target.value) || 0)
                       }
-                      step="0.1"
-                      min="0.1"
-                      max="10"
+                      step="0.5"
+                      min="0.5"
+                      max="9.5"
                       className="border-0 text-center font-medium h-8 px-1 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none"
                     />
                     <Button

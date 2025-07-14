@@ -7,9 +7,9 @@ import { Role } from "@repo/types";
 export const useRole = () => {
      const {
        data: session,
-       isPending, //loading state
-       error, //error object
-       refetch, //refetch the session
+       isPending, 
+       error, 
+       refetch,
      } = useSession();
   const user = session?.user;
 
