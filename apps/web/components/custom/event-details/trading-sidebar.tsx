@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
@@ -15,10 +15,11 @@ import { useSession } from "@/lib/auth-client";
 import { useOrderBook } from "@/hooks/use-order-book";
 
 interface EventFormData {
+  eventId: string;
   side: "yes" | "no";
-  limitPrice?: number; // Make this optional
+  limitPrice?: number;
   quantity: number;
-  type: "buy" 
+  type: "buy";
   orderType: "market" | "limit";
   price?: number;
 }
@@ -34,25 +35,32 @@ export default function TradingSidebar({
   const router = useRouter();
   const session = useSession();
 
-  const {  orderBookData,  } = useOrderBook(eventId, session?.data?.userId);
+  const { orderBookData } = useOrderBook(eventId, session?.data?.user?.id);
+  
   // @ts-ignore
-  const lastYesPrice = orderBookData?.lastYesPrice;
-  // @ts-ignore
-  const lastNoPrice = orderBookData?.lastNoPrice;
+  const lastYesPrice = orderBookData?.lastYesPrice || 5.0; // Fallback price
+  // @ts-ignore  
+  const lastNoPrice = orderBookData?.lastNoPrice || 5.0; // Fallback price
 
   const [selectedOption, setSelectedOption] = useState<"yes" | "no">("yes");
-  const [price, setPrice] = useState(
-    selectedOption === "yes" ? lastYesPrice : lastNoPrice
-  );
+  const [price, setPrice] = useState<number>(0);
   const [quantity, setQuantity] = useState(1);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Update the calculation logic to use actual prices from props
+  // Update price when selectedOption or orderBookData changes
+  useEffect(() => {
+    const currentMarketPrice = selectedOption === "yes" ? lastYesPrice : lastNoPrice;
+    if (currentMarketPrice && currentMarketPrice > 0) {
+      setPrice(currentMarketPrice);
+    }
+  }, [selectedOption, lastYesPrice, lastNoPrice]);
+
   const actualPrice = showAdvanced
     ? price
     : selectedOption === "yes"
       ? lastYesPrice
       : lastNoPrice;
+      
   const youPut = actualPrice * quantity;
   const youGet = selectedOption === "yes" ? 10.0 * quantity : 10.0 * quantity;
   const potentialProfit = youGet - youPut;
@@ -60,23 +68,33 @@ export default function TradingSidebar({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formData: any = {
+    // Validate so we valid price
+    const currentPrice = showAdvanced ? price : (selectedOption === "yes" ? lastYesPrice : lastNoPrice);
+    
+    if (!currentPrice || currentPrice <= 0) {
+      toast.error("Invalid price. Please wait for market data to load or set a valid price.");
+      return;
+    }
+
+    const formData: EventFormData = {
       eventId: eventId,
       side: selectedOption,
       quantity: quantity,
       type: "buy",
-      orderType: showAdvanced ? "limit" : "market", // limit when advanced, market when not
-      limitPrice: showAdvanced ? price : undefined,
-      price: showAdvanced ? undefined : Number(price),
+      orderType: showAdvanced ? "limit" : "market",
     };
 
-    // Only include limitPrice if advanced options are enabled (limit order)
+    // For limit orders, use the custom price
     if (showAdvanced) {
       formData.limitPrice = Number(price);
+      formData.orderType = "limit";
+    } else {
+      // For market orders, use the current market price
+      formData.price = Number(currentPrice);
+      formData.orderType = "market";
     }
 
-    console.log(formData);
-    
+    console.log("Form data being sent:", formData);
     onSubmit(formData);
   };
 
@@ -96,18 +114,30 @@ export default function TradingSidebar({
         error.message ||
         "Something went wrong";
       toast.error(message);
+      console.error("Order error:", error.response?.data);
     },
   });
 
   const onSubmit = (data: EventFormData) => {
+    console.log("data", data);
     mutation.mutate(data);
   };
 
   // All states available:
   const isLoading = mutation.isPending;
 
+  if (!lastYesPrice && !lastNoPrice) {
+    return (
+      <Card className="sticky top-6 shadow-none rounded-2xl mt-6">
+        <CardContent className="p-4">
+          <div className="text-center text-gray-500">Loading market data...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="sticky top-6 shadow-none  rounded-2xl mt-6">
+    <Card className="sticky top-6 shadow-none rounded-2xl mt-6">
       <CardContent className="p-4 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* YES/NO Toggle */}
@@ -121,7 +151,7 @@ export default function TradingSidebar({
                   : "bg-white hover:bg-gray-200 text-gray-700"
               }`}
             >
-              Yes ₹{Number(lastYesPrice).toFixed(2)}
+              Yes ₹{lastYesPrice ? Number(lastYesPrice).toFixed(2) : "-.--"}
             </Button>
             <Button
               type="button"
@@ -132,7 +162,7 @@ export default function TradingSidebar({
                   : "bg-white hover:bg-gray-200 text-gray-700"
               }`}
             >
-              No ₹{Number(lastNoPrice).toFixed(2)}
+              No ₹{lastNoPrice ? Number(lastNoPrice).toFixed(2) : "-.--"}
             </Button>
           </div>
 
@@ -220,13 +250,13 @@ export default function TradingSidebar({
                     </Button>
                     <Input
                       type="number"
-                      value={price }
+                      value={price}
                       onChange={(e) =>
                         setPrice(Number.parseFloat(e.target.value) || 0)
                       }
-                      step="0.5"
-                      min="0.5"
-                      max="9.5"
+                      step="0.1"
+                      min="0.1"
+                      max="9.9"
                       className="border-0 text-center font-medium h-8 px-1 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none"
                     />
                     <Button
@@ -234,7 +264,7 @@ export default function TradingSidebar({
                       variant="outline"
                       size="icon"
                       className="h-6 w-6 p-0 rounded-xl hover:text-blue-600 border-none focus:outline-none bg-[#f5f5f5]"
-                      onClick={() => setPrice(Math.min(10, price + 0.1))}
+                      onClick={() => setPrice(Math.min(9.9, price + 0.1))}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -267,7 +297,7 @@ export default function TradingSidebar({
                     Potential Profit: ₹{potentialProfit.toFixed(1)}
                   </div>
                   <div className="text-xs text-gray-500">
-                    Price: ₹{actualPrice} × {quantity} qty
+                    Price: ₹{actualPrice ? Number(actualPrice).toFixed(2) : "-.--"} × {quantity} qty
                   </div>
                 </div>
               </div>
@@ -276,7 +306,7 @@ export default function TradingSidebar({
               <Button
                 type="submit"
                 className="w-full rounded-xl font-semibold h-12 bg-blue-600 hover:bg-blue-700 text-white mt-4"
-                disabled={isLoading}
+                disabled={isLoading || !actualPrice || actualPrice <= 0}
               >
                 {isLoading ? "Placing order..." : "Place order"}
               </Button>

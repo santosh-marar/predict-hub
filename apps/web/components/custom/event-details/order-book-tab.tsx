@@ -31,7 +31,7 @@ export default function OrderBookTabs({ eventId, userId }: OrderBookProps) {
     unsubscribeFromOrderBook,
   } = useOrderBook(eventId, userId);
 
-  console.log("realOrderBookData", realOrderBookData);
+  // console.log("realOrderBookData", realOrderBookData);
 
   // Process the real order book data to always to show 5 rows only
   const processOrderBookData = () => {

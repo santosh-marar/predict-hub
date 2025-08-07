@@ -13,8 +13,7 @@ export const trade = pgTable(
       .notNull(),
 
     // Maker and taker orders
-    makerOrderId: uuid("maker_order_id")
-      .references(() => order.id),
+    makerOrderId: uuid("maker_order_id").references(() => order.id),
     takerOrderId: uuid("taker_order_id")
       .references(() => order.id)
       .notNull(),
@@ -27,6 +26,7 @@ export const trade = pgTable(
 
     // Trade details
     side: text("side", { enum: ["yes", "no"] }).notNull(),
+    type: text("type", { enum: ["buy", "sell"] }).notNull(),
     quantity: decimal("quantity", { precision: 15, scale: 5 }).notNull(),
     price: decimal("price", { precision: 15, scale: 5 }).notNull(),
     amount: decimal("amount", { precision: 15, scale: 5 }).notNull(),

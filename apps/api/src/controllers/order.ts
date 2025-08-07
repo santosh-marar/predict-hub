@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AuthRequest } from "src/middleware/auth";
 import asyncMiddleware from "src/middleware/async-middleware";
 import { placeOrder } from "@repo/order-engine";
+import { handleOrderBookChange } from "src/service/socket-io";
 
 // Types for order book
 export interface OrderBookEntry {
@@ -87,6 +88,8 @@ export const createOrder = asyncMiddleware(
       limitPrice: limitPrice,
       price,
     });
+
+    await handleOrderBookChange(validatedData.eventId);
 
     res.status(201).json({
       success: true,
@@ -256,7 +259,7 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
 
 // Testing
 const result = await getOrderBook("8c6ad740-0957-4764-85b2-7a08113a311a");
-console.log("Final result:", result);
+// console.log("Final result:", result);
 // console.log("Final result no asks", result.raw.noAsks);
 // console.log("Final result yes asks", result.raw?.yesBids);
 

@@ -15,7 +15,9 @@ import {
 import { event } from "./event";
 import { user } from "./auth";
 
-export const position = pgTable("position", {
+export const position = pgTable(
+  "position",
+  {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id")
       .references(() => user.id, { onDelete: "cascade" })
@@ -25,6 +27,7 @@ export const position = pgTable("position", {
       .notNull(),
 
     side: text("side", { enum: ["YES", "NO"] }).notNull(),
+    type: text("type", { enum: ["buy", "sell"] }).notNull(),
 
     shares: decimal("shares", { precision: 15, scale: 5 })
       .default("0")

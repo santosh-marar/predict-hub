@@ -27,8 +27,9 @@ export const transactions = pgTable(
 
     // Transaction details
     type: text("type", {
-      enum: ["deposit", "withdrawal", "trade", "payout", "refund", "bonus"],
+      enum: ["deposit", "withdrawal", "buy", "sell", "payout", "refund", "bonus"],
     }).notNull(),
+    side: text("side", { enum: ["yes", "no"] }).notNull(),
     amount: decimal("amount", { precision: 15, scale: 5 }).notNull(),
     totalFees: decimal("total_fees", { precision: 15, scale: 5 }).notNull(),
     takerFees: decimal("taker_fees", { precision: 15, scale: 5 }).notNull(),
