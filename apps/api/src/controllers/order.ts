@@ -258,7 +258,7 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
 }
 
 // Testing
-const result = await getOrderBook("8c6ad740-0957-4764-85b2-7a08113a311a");
+// const result = await getOrderBook("8c6ad740-0957-4764-85b2-7a08113a311a");
 // console.log("Final result:", result);
 // console.log("Final result no asks", result.raw.noAsks);
 // console.log("Final result yes asks", result.raw?.yesBids);
