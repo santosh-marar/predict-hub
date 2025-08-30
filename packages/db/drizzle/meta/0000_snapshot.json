@@ -1,5 +1,5 @@
 {
-  "id": "54a2bf7a-13ea-45f0-a27c-e60fe2b518ea",
+  "id": "e9ee6ad6-8127-47fc-95e9-c354df319ac9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -954,21 +954,21 @@
         },
         "total_volume": {
           "name": "total_volume",
-          "type": "numeric(15, 5)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": true,
           "default": "'10000'"
         },
         "total_yes_shares": {
           "name": "total_yes_shares",
-          "type": "numeric(15, 5)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": true,
           "default": "'5000'"
         },
         "total_no_shares": {
           "name": "total_no_shares",
-          "type": "numeric(15, 5)",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": true,
           "default": "'5000'"
@@ -1436,13 +1436,13 @@
         },
         "limit_price": {
           "name": "limit_price",
-          "type": "numeric(5, 5)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": false
         },
         "average_fill_price": {
           "name": "average_fill_price",
-          "type": "numeric(5, 5)",
+          "type": "numeric(15, 5)",
           "primaryKey": false,
           "notNull": false
         },
@@ -1670,6 +1670,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "shares": {
           "name": "shares",
           "type": "numeric(15, 5)",
@@ -1849,6 +1855,12 @@
         },
         "side": {
           "name": "side",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -2084,6 +2096,12 @@
         },
         "type": {
           "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "side": {
+          "name": "side",
           "type": "text",
           "primaryKey": false,
           "notNull": true

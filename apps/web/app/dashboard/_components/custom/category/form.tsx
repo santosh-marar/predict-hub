@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -31,19 +30,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import api from "@/lib/axios";
+import { deleteImageFromSupabase, uploadImageToSupabase } from "@/lib/image";
+import { ImageSelector } from "@/components/custom/image-uploader";
 
-// Category form schema - make isActive required to match the form expectations
+// Category form schema
 const categoryFormSchema = z.object({
   title: z
     .string()
     .min(2, "Title must be at least 2 characters")
     .max(100, "Title must be less than 100 characters"),
   description: z.string().optional(),
-  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  imageUrl: z.string().optional(),
   isActive: z.boolean()
 });
 
-// Define the form values type explicitly
 type CategoryFormValues = {
   title: string;
   description?: string;
@@ -63,36 +63,54 @@ interface CategoryFormProps {
 
 export default function CategoryForm({ initialData }: CategoryFormProps) {
   const router = useRouter();
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    initialData?.imageUrl || null
-  );
-
   const isEditMode = !!initialData;
-
   const queryClient = useQueryClient();
+  
+  // Track selected file separately from form
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Use the explicit type for useForm
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       title: initialData?.title || "",
       description: initialData?.description || "",
       imageUrl: initialData?.imageUrl || "",
-      isActive:
-        initialData?.isActive !== undefined ? initialData.isActive : true,
+      isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: CategoryFormValues) => {
-      const response = await api.post("/category", data);
-      return response.data;
+      let finalData = { ...data };
+
+      if (selectedFile) {
+        try {
+          const imageUrl = await uploadImageToSupabase(selectedFile);
+          finalData.imageUrl = imageUrl;
+          
+          // Delete old image if updating and there was an existing image
+          if (isEditMode && initialData?.imageUrl && initialData.imageUrl !== imageUrl) {
+            await deleteImageFromSupabase(initialData.imageUrl);
+          }
+        } catch (error: any) {
+          throw new Error(`Image upload failed: ${error.message}`);
+        }
+      }
+
+      if (isEditMode && initialData?.id) {
+        const response = await api.put(`/category/${initialData.id}`, finalData);
+        return response.data;
+      } else {
+        const response = await api.post("/category", finalData);
+        return response.data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["category"] });
       toast.success(
         `Category ${isEditMode ? "updated" : "created"} successfully!`
       );
+      
       if (!isEditMode) {
         form.reset({
           title: "",
@@ -100,7 +118,9 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
           imageUrl: "",
           isActive: true,
         });
-        setImagePreview(null);
+        setSelectedFile(null);
+      } else {
+        router.back();
       }
     },
     onError: (error: any) => {
@@ -116,13 +136,7 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
     mutation.mutate(data);
   };
 
-  // All states available:
   const isLoading = mutation.isPending;
-  const isError = mutation.isError;
-  const isSuccess = mutation.isSuccess;
-  const isIdle = mutation.isIdle;
-  const error = mutation.error;
-  const data = mutation.data;
 
   return (
     <Card className="w-full max-w-2xl rounded-xs">
@@ -130,6 +144,12 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
         <CardTitle>
           {isEditMode ? "Edit Category" : "Create New Category"}
         </CardTitle>
+        <CardDescription>
+          {isEditMode 
+            ? "Update your category information" 
+            : "Add a new category to your collection"
+          }
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -139,7 +159,7 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Title *</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter category title"
@@ -166,32 +186,27 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
                       rows={4}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Provide a brief description of this category
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
             <FormItem>
-              <FormLabel>Image</FormLabel>
+              <FormLabel>Category Image</FormLabel>
               <FormControl>
-                <div className="space-y-4">
-                  <Input type="file" accept="image/*" disabled={isLoading} />
-                  {imagePreview && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Preview:
-                      </p>
-                      <div className="relative w-32 h-32 rounded-md overflow-hidden border">
-                        <img
-                          src={imagePreview || "/placeholder.svg"}
-                          alt="Category preview"
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <ImageSelector
+                  selectedFile={selectedFile}
+                  onFileSelect={setSelectedFile}
+                  existingImageUrl={form.getValues('imageUrl')}
+                  disabled={isLoading}
+                />
               </FormControl>
+              <FormDescription>
+                Select an image to upload when you save the category
+              </FormDescription>
             </FormItem>
 
             <FormField
@@ -201,6 +216,9 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Active Status</FormLabel>
+                    <FormDescription>
+                      When active, this category will be visible to users
+                    </FormDescription>
                   </div>
                   <FormControl>
                     <Switch
@@ -223,9 +241,13 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
         >
           Cancel
         </Button>
-        <Button onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
+        <Button 
+          onClick={form.handleSubmit(onSubmit)} 
+          disabled={isLoading}
+          className="min-w-[120px]"
+        >
           {isLoading
-            ? "Saving..."
+            ? selectedFile ? "Uploading..." : "Saving..."
             : isEditMode
               ? "Update Category"
               : "Create Category"}

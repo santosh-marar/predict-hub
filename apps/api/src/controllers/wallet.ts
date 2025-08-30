@@ -127,6 +127,7 @@ export const deposit = async (
     // Create transaction record
     const [newTransaction] = await db
       .insert(transactions)
+      // @ts-ignore
       .values({
         userId,
         type: "deposit",
@@ -198,6 +199,7 @@ export const withdraw = async (
     // Create transaction record
     const [newTransaction] = await db
       .insert(transactions)
+      // @ts-ignore
       .values({
         userId,
         type: "withdrawal",
@@ -430,7 +432,7 @@ export const updateWalletBalance = async (
 // Create wallet for new user (internal use)
 export const createWallet = async (
   userId: string,
-  initialBalance: number = 1000
+  initialBalance: number = 10000
 ) => {
   try {
     const newWallet = await db

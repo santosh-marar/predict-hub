@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1751438661815,
-      "tag": "0000_yielding_argent",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1751457516331,
-      "tag": "0001_gray_garia",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1752225368851,
-      "tag": "0002_chunky_earthquake",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1752226925210,
-      "tag": "0003_wide_lizard",
+      "when": 1756482208274,
+      "tag": "0000_unusual_leech",
       "breakpoints": true
     }
   ]
