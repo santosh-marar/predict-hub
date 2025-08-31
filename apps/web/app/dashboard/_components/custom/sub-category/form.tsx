@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,7 @@ import { Button } from "@repo/ui/components/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,12 +23,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@repo/ui/components/card";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import api from "@/lib/axios";
 import {
   Select,
   SelectContent,
@@ -36,15 +32,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
+import api from "@/lib/axios";
+import { supabase } from "@/lib/supabase";
+import { deleteImageFromSupabase, uploadImageToSupabase } from "@/lib/image";
+import { ImageSelector } from "@/components/custom/image-uploader";
 
 const subCategoryFormSchema = z.object({
-  categoryId: z.string(),
+  categoryId: z.string().min(1, "Please select a parent category"),
   title: z
     .string()
     .min(2, "Title must be at least 2 characters")
     .max(100, "Title must be less than 100 characters"),
   description: z.string().optional(),
-  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  imageUrl: z.string().optional(),
   isActive: z.boolean(),
 });
 
@@ -69,15 +74,12 @@ interface SubCategoryFormProps {
 
 export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
   const router = useRouter();
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    initialData?.imageUrl || null
-  );
-
   const isEditMode = !!initialData;
-
   const queryClient = useQueryClient();
+  
+  // Track selected file separately from form
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Use the explicit type for useForm
   const form = useForm<SubCategoryFormValues>({
     resolver: zodResolver(subCategoryFormSchema),
     defaultValues: {
@@ -85,37 +87,57 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
       title: initialData?.title || "",
       description: initialData?.description || "",
       imageUrl: initialData?.imageUrl || "",
-      isActive:
-        initialData?.isActive !== undefined ? initialData.isActive : true,
+      isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
     },
   });
 
-
+  // Fetch categories for the dropdown
   const getCategories = async () => {
     const response = await api.get("/category");
     return response.data;
   };
 
-  const { data: categoriesData, isLoading: isLoadingCategories, error: errorCategories } = useQuery({
+  const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
     queryKey: ["category"],
     queryFn: getCategories,
   });
 
   const categories = categoriesData?.data;
 
-
-
   const mutation = useMutation({
     mutationFn: async (data: SubCategoryFormValues) => {
-      const response = await api.post("/sub-category", data);
-      console.log(response.data)
-      return response.data;
+      let finalData = { ...data };
+
+      // Upload image first if there's a selected file
+      if (selectedFile) {
+        try {
+          const imageUrl = await uploadImageToSupabase(selectedFile, 'sub-categories', 'images');
+          finalData.imageUrl = imageUrl;
+          
+          // Delete old image if updating and there was an existing image
+          if (isEditMode && initialData?.imageUrl && initialData.imageUrl !== imageUrl) {
+            await deleteImageFromSupabase(initialData.imageUrl, 'sub-categories');
+          }
+        } catch (error: any) {
+          throw new Error(`Image upload failed: ${error.message}`);
+        }
+      }
+
+      // Make API call with the data including the new image URL
+      if (isEditMode && initialData?.id) {
+        const response = await api.put(`/sub-category/${initialData.id}`, finalData);
+        return response.data;
+      } else {
+        const response = await api.post("/sub-category", finalData);
+        return response.data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sub-category"] });
       toast.success(
         `Sub-category ${isEditMode ? "updated" : "created"} successfully!`
       );
+      
       if (!isEditMode) {
         form.reset({
           categoryId: "",
@@ -124,7 +146,9 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
           imageUrl: "",
           isActive: true,
         });
-        setImagePreview(null);
+        setSelectedFile(null);
+      } else {
+        router.back();
       }
     },
     onError: (error: any) => {
@@ -137,42 +161,58 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
   });
 
   const onSubmit = (data: SubCategoryFormValues) => {
+    console.log('Sub-category form data being submitted:', {
+      formData: data,
+      selectedFile: selectedFile?.name || 'No file selected'
+    });
     mutation.mutate(data);
   };
 
-
-
-  // All states available:
   const isLoading = mutation.isPending;
-  const isError = mutation.isError;
-  const isSuccess = mutation.isSuccess;
-  const isIdle = mutation.isIdle;
-  const error = mutation.error;
-  const data = mutation.data;
 
   return (
-    <Card className="w-full max-w-xl rounded-xs">
+    <Card className="w-full max-w-2xl rounded-xs">
       <CardHeader>
         <CardTitle>
-          {isEditMode ? "Edit Subcategory" : "Create New Subcategory"}
+          {isEditMode ? "Edit Sub-category" : "Create New Sub-category"}
         </CardTitle>
+        <CardDescription>
+          {isEditMode 
+            ? "Update your sub-category information" 
+            : "Add a new sub-category under a parent category"
+          }
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="title"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter category title"
-                      {...field}
-                      disabled={isLoading}
-                    />
-                  </FormControl>
+                  <FormLabel>Parent Category *</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={isLoading || isLoadingCategories}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a parent category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories?.map((cat: any) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Choose the parent category for this sub-category
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -180,28 +220,17 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
 
             <FormField
               control={form.control}
-              name="categoryId"
+              name="title"
               render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Parent Category</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={isLoading}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="w-full">
-                      {categories?.map((cat: any) => (
-                        <SelectItem key={cat.id} value={cat.id} className="w-full">
-                          {cat.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <FormItem>
+                  <FormLabel>Title *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter sub-category title"
+                      {...field}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -215,38 +244,33 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter category description (optional)"
+                      placeholder="Enter sub-category description (optional)"
                       {...field}
                       disabled={isLoading}
                       rows={4}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Provide a brief description of this sub-category
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
             <FormItem>
-              <FormLabel>Image</FormLabel>
+              <FormLabel>Sub-category Image</FormLabel>
               <FormControl>
-                <div className="space-y-4">
-                  <Input type="file" accept="image/*" disabled={isLoading} />
-                  {imagePreview && (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Preview:
-                      </p>
-                      <div className="relative w-32 h-32 rounded-md overflow-hidden border">
-                        <img
-                          src={imagePreview || "/placeholder.svg"}
-                          alt="Category preview"
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <ImageSelector  
+                  selectedFile={selectedFile}
+                  onFileSelect={setSelectedFile}
+                  existingImageUrl={form.getValues('imageUrl')}
+                  disabled={isLoading}
+                />
               </FormControl>
+              <FormDescription>
+                Select an image to upload when you save the sub-category
+              </FormDescription>
             </FormItem>
 
             <FormField
@@ -256,6 +280,9 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Active Status</FormLabel>
+                    <FormDescription>
+                      When active, this sub-category will be visible to users
+                    </FormDescription>
                   </div>
                   <FormControl>
                     <Switch
@@ -278,12 +305,16 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
         >
           Cancel
         </Button>
-        <Button onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
+        <Button 
+          onClick={form.handleSubmit(onSubmit)} 
+          disabled={isLoading}
+          className="min-w-[120px]"
+        >
           {isLoading
-            ? "Saving..."
+            ? selectedFile ? "Uploading..." : "Saving..."
             : isEditMode
-              ? "Update Category"
-              : "Create Category"}
+              ? "Update Sub-category"
+              : "Create Sub-category"}
         </Button>
       </CardFooter>
     </Card>
