@@ -1,7 +1,6 @@
 import { differenceInMinutes, parseISO } from "date-fns";
 import { format } from "date-fns";
 
-
 export const capitalize = (word: string) =>
   word.charAt(0).toUpperCase() + word.slice(1);
 
@@ -17,9 +16,8 @@ export function getMinutesLeft(endTime: string | Date): number {
  */
 export function formatDateIntoDayMonthYear(date: string | Date): string {
   try {
-    return format(new Date(date), 'dd MMM, yyyy');
+    return format(new Date(date), "dd MMM, yyyy");
   } catch {
-    return '';
+    return "";
   }
 }
-

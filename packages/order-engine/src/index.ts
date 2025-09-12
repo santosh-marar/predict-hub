@@ -1,13 +1,22 @@
-import { db, event, order, wallet } from "@repo/db";
+import { db, order, wallet } from "@repo/db";
 import { lockUserFunds, validateUserBalance } from "./function/fund";
-import { TAKER_FEE_RATE, DEFAULT_SLIPPAGE_TOLERANCE, MAKER_FEE_RATE } from "./constants";
+import {
+  TAKER_FEE_RATE,
+  DEFAULT_SLIPPAGE_TOLERANCE,
+  MAKER_FEE_RATE,
+} from "./constants";
 import { validateEvent } from "./validation";
-import { calculateLimitOrderAmount, calculateMarketOrderAmount, createLimitOrder, createMarketOrder } from "./function/order";
+import {
+  calculateLimitOrderAmount,
+  calculateMarketOrderAmount,
+  createLimitOrder,
+  createMarketOrder,
+} from "./function/order";
 import { insertTradeRecord } from "./function/trade";
 import { executeAMMTrade } from "./function/amm";
 import { OrderBookEntry, OrderData, TradeExecution } from "./types";
 import Decimal from "decimal.js";
-import {sql, desc, eq, gt, gte, asc, lte, and} from "drizzle-orm";
+import { sql, desc, eq, gt, gte, asc, lte, and } from "drizzle-orm";
 import { upsertUserPosition } from "./function/position";
 import { createTransactionRecords } from "./function/transaction";
 
@@ -32,18 +41,18 @@ export async function placeOrder(orderData: OrderData): Promise<any> {
         tx,
         orderData,
         orderAmounts,
-        eventData.endTime
+        eventData.endTime,
       );
     } else if (orderData.orderType === "market") {
       orderAmounts = calculateMarketOrderAmount(
         orderData,
-        DEFAULT_SLIPPAGE_TOLERANCE
+        DEFAULT_SLIPPAGE_TOLERANCE,
       );
       newOrder = await createMarketOrder(
         tx,
         orderData,
         orderAmounts,
-        eventData.endTime
+        eventData.endTime,
       );
     } else {
       throw new Error("Invalid order type. Must be 'limit' or 'market'");
@@ -63,14 +72,13 @@ export async function placeOrder(orderData: OrderData): Promise<any> {
   });
 }
 
-
 /**
  * Core order matching logic with complete trade execution and AMM fallback
  */
 export async function matchOrder(
   tx: any,
   newOrder: any,
-  eventData: any
+  eventData: any,
 ): Promise<TradeExecution[]> {
   const trades: TradeExecution[] = [];
   let remainingQuantity = new Decimal(newOrder.remainingQuantity);
@@ -83,7 +91,7 @@ export async function matchOrder(
 
     const tradeQuantity = Decimal.min(
       remainingQuantity,
-      new Decimal(matchingOrder.remainingQuantity)
+      new Decimal(matchingOrder.remainingQuantity),
     );
 
     const tradePrice = determineTradePrice(newOrder, matchingOrder);
@@ -177,14 +185,14 @@ export async function matchOrder(
         tx,
         newOrder,
         eventData,
-        remainingQuantity
+        remainingQuantity,
       );
       if (ammTrade) {
         trades.push(ammTrade);
       }
     } else {
       console.warn(
-        `AMM does not have enough ${side === "yes" ? "no" : "yes"} shares to fulfill the remaining quantity for this ${side} ${newOrder.type} order.`
+        `AMM does not have enough ${side === "yes" ? "no" : "yes"} shares to fulfill the remaining quantity for this ${side} ${newOrder.type} order.`,
       );
     }
   }
@@ -197,11 +205,11 @@ export async function matchOrder(
  */
 export async function getMatchingOrders(
   tx: any,
-  newOrder: any
+  newOrder: any,
 ): Promise<OrderBookEntry[]> {
   // Match same side (YES with YES, NO with NO) but opposite type (buy with sell)
   const oppositeType = newOrder.type === "buy" ? "sell" : "buy";
-  const sameSide = newOrder.side; 
+  const sameSide = newOrder.side;
 
   let priceCondition: any;
   let orderByClause: any;
@@ -210,17 +218,15 @@ export async function getMatchingOrders(
     // Market orders match at any price
     priceCondition = sql`1=1`;
     orderByClause =
-      newOrder.type === "buy"
-        ? asc(order.limitPrice) 
-        : desc(order.limitPrice); 
+      newOrder.type === "buy" ? asc(order.limitPrice) : desc(order.limitPrice);
   } else {
     // Limit orders match based on price improvement
     if (newOrder.type === "buy") {
       priceCondition = lte(order.limitPrice, newOrder.limitPrice);
-      orderByClause = asc(order.limitPrice); 
+      orderByClause = asc(order.limitPrice);
     } else {
       priceCondition = gte(order.limitPrice, newOrder.limitPrice);
-      orderByClause = desc(order.limitPrice); 
+      orderByClause = desc(order.limitPrice);
     }
   }
 
@@ -231,13 +237,13 @@ export async function getMatchingOrders(
       and(
         eq(order.eventId, newOrder.eventId),
         eq(order.side, sameSide),
-        eq(order.type, oppositeType), 
+        eq(order.type, oppositeType),
         eq(order.status, "pending"),
         gt(order.remainingQuantity, "0"),
-        priceCondition
-      )
+        priceCondition,
+      ),
     )
-    .orderBy(orderByClause, asc(order.createdAt)) 
+    .orderBy(orderByClause, asc(order.createdAt))
     .limit(50);
 }
 
@@ -253,4 +259,3 @@ function determineTradePrice(newOrder: any, matchingOrder: any): Decimal {
     return new Decimal(matchingOrder.limitPrice);
   }
 }
-

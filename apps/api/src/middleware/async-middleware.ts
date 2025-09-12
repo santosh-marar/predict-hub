@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 
-
 type AsyncFunction = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => Promise<any> | any;
 
 const asyncMiddleware =
@@ -15,7 +14,6 @@ const asyncMiddleware =
   };
 
 export default asyncMiddleware;
-
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -32,76 +30,98 @@ export interface ApiResponse<T = any> {
   };
 }
 
-
 // Response utilities
-export const createResponse = <T>(data: T, message?: string): ApiResponse<T> => ({
+export const createResponse = <T>(
+  data: T,
+  message?: string,
+): ApiResponse<T> => ({
   success: true,
   data,
   message,
 });
 
-export const createErrorResponse = (message: string, errors?: any[]): ApiResponse => ({
+export const createErrorResponse = (
+  message: string,
+  errors?: any[],
+): ApiResponse => ({
   success: false,
   message,
   errors,
 });
 
 // Validation middleware factory
-export const validateSchema = (schema: z.ZodSchema, source: 'body' | 'params' | 'query' = 'body') => {
-  return asyncMiddleware(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const data = source === 'body' ? req.body : source === 'params' ? req.params : req.query;
-      req[source] = schema.parse(data);
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          success: false,
-          message: 'Validation error',
-          errors: error.errors,
-        });
+export const validateSchema = (
+  schema: z.ZodSchema,
+  source: "body" | "params" | "query" = "body",
+) => {
+  return asyncMiddleware(
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const data =
+          source === "body"
+            ? req.body
+            : source === "params"
+              ? req.params
+              : req.query;
+        req[source] = schema.parse(data);
+        next();
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({
+            success: false,
+            message: "Validation error",
+            errors: error.errors,
+          });
+        }
+        next(error);
       }
-      next(error);
-    }
-  });
+    },
+  );
 };
 
 // Global error handler
-export const errorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', error);
+export const errorHandler = (
+  error: any,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  console.error("Error:", error);
 
   // Zod validation errors
   if (error instanceof z.ZodError) {
     return res.status(400).json({
       success: false,
-      message: 'Validation error',
+      message: "Validation error",
       errors: error.errors,
     });
   }
 
   // Database errors (you can customize based on your DB)
-  if (error.code === '23505') { // Postgres unique constraint
+  if (error.code === "23505") {
+    // Postgres unique constraint
     return res.status(409).json({
       success: false,
-      message: 'Resource already exists',
+      message: "Resource already exists",
     });
   }
 
-  if (error.code === '23503') { // Postgres foreign key constraint
+  if (error.code === "23503") {
+    // Postgres foreign key constraint
     return res.status(400).json({
       success: false,
-      message: 'Referenced resource does not exist',
+      message: "Referenced resource does not exist",
     });
   }
 
   // Default error
   const statusCode = error.statusCode || error.status || 500;
-  const message = error.message || 'Internal server error';
+  const message = error.message || "Internal server error";
 
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+    ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
   });
 };
 
@@ -120,25 +140,25 @@ export class AppError extends Error {
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Resource not found') {
+  constructor(message: string = "Resource not found") {
     super(message, 404);
   }
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string = 'Validation failed') {
+  constructor(message: string = "Validation failed") {
     super(message, 400);
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Unauthorized') {
+  constructor(message: string = "Unauthorized") {
     super(message, 401);
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Forbidden') {
+  constructor(message: string = "Forbidden") {
     super(message, 403);
   }
 }
@@ -149,10 +169,10 @@ export const createPaginationResponse = <T>(
   page: number,
   limit: number,
   totalCount: number,
-  message?: string
+  message?: string,
 ): ApiResponse<T[]> => {
   const totalPages = Math.ceil(totalCount / limit);
-  
+
   return {
     success: true,
     data,

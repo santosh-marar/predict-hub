@@ -48,7 +48,7 @@ let io: Server<
 
 // Initialize Socket.IO server
 export const initializeSocket = (
-  httpServer: HTTPServer
+  httpServer: HTTPServer,
 ): Server<
   ClientToServerEvents,
   ServerToClientEvents,
@@ -75,7 +75,7 @@ export const initializeSocket = (
         ServerToClientEvents,
         InterServerEvents,
         SocketData
-      >
+      >,
     ) => {
       // Initialize socket data
       socket.data.subscribedEvents = new Set();
@@ -205,7 +205,7 @@ export const initializeSocket = (
       socket.on("error", (error) => {
         console.error(`Socket error for ${socket.id}:`, error);
       });
-    }
+    },
   );
 
   return io;
@@ -234,7 +234,7 @@ export const broadcastOrderBookUpdate = async (eventId: string) => {
   } catch (error) {
     console.error(
       `Failed to broadcast order book update for event ${eventId}:`,
-      error
+      error,
     );
   }
 };
@@ -243,7 +243,7 @@ export const broadcastOrderBookUpdate = async (eventId: string) => {
 export const emitToEvent = (
   eventId: string,
   event: keyof ServerToClientEvents,
-  data: any
+  data: any,
 ) => {
   if (io) {
     io.to(`event_${eventId}`).emit(event, data);
@@ -265,7 +265,7 @@ export const emitToAll = (event: keyof ServerToClientEvents, data: any) => {
 export const emitToUser = (
   userId: string,
   event: keyof ServerToClientEvents,
-  data: any
+  data: any,
 ) => {
   if (!io) {
     console.error("Socket.IO not initialized");
@@ -286,10 +286,10 @@ export const getConnectionStats = () => {
     totalConnections: io.sockets.sockets.size,
     totalSubscriptions: Array.from(orderBookSubscriptions.values()).reduce(
       (sum, sockets) => sum + sockets.size,
-      0
+      0,
     ),
     eventSubscriptions: Array.from(orderBookSubscriptions.entries()).map(
-      ([eventId, sockets]) => ({ eventId, subscriberCount: sockets.size })
+      ([eventId, sockets]) => ({ eventId, subscriberCount: sockets.size }),
     ),
     connectedUsers: userSockets.size,
   };

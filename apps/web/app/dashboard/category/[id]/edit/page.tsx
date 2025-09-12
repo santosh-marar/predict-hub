@@ -4,7 +4,7 @@ import CategoryForm from "../../../_components/custom/category/form";
 import { cookies } from "next/headers";
 
 export default async function EditCategoryPage(props: {
-  params: Promise<{ id: string }>; 
+  params: Promise<{ id: string }>;
 }) {
   const { id: categoryId } = await props.params;
 
@@ -20,7 +20,7 @@ export default async function EditCategoryPage(props: {
           "Content-Type": "application/json",
         },
         cache: "no-store",
-      }
+      },
     );
 
     if (!res.ok) throw new Error("Failed to fetch category");
@@ -30,7 +30,7 @@ export default async function EditCategoryPage(props: {
 
     initialData = json.data;
   } catch (error) {
-    return notFound(); 
+    return notFound();
   }
 
   return (

@@ -10,7 +10,7 @@ import { DEFAULT_SLIPPAGE_TOLERANCE } from "@/constants";
  */
 export async function validateUserBalance(
   tx: any,
-  orderData: OrderData
+  orderData: OrderData,
 ): Promise<void> {
   const [userWallet] = await tx
     .select()
@@ -23,7 +23,7 @@ export async function validateUserBalance(
   }
 
   const availableBalance = new Decimal(userWallet.balance).sub(
-    new Decimal(userWallet.lockedBalance)
+    new Decimal(userWallet.lockedBalance),
   );
 
   let requiredAmount: Decimal;
@@ -34,7 +34,7 @@ export async function validateUserBalance(
   } else if (orderData.orderType === "market") {
     const { totalAmount } = calculateMarketOrderAmount(
       orderData,
-      DEFAULT_SLIPPAGE_TOLERANCE
+      DEFAULT_SLIPPAGE_TOLERANCE,
     );
     requiredAmount = new Decimal(totalAmount);
   } else {
@@ -43,11 +43,10 @@ export async function validateUserBalance(
 
   if (availableBalance.lt(requiredAmount)) {
     throw new Error(
-      `Insufficient balance. Required: ${requiredAmount.toString()}, Available: ${availableBalance.toString()}`
+      `Insufficient balance. Required: ${requiredAmount.toString()}, Available: ${availableBalance.toString()}`,
     );
   }
 }
-
 
 /**
  * Lock user funds for pending orders
@@ -55,7 +54,7 @@ export async function validateUserBalance(
 export async function lockUserFunds(
   tx: any,
   userId: string,
-  amount: string
+  amount: string,
 ): Promise<void> {
   await tx
     .update(wallet)
@@ -73,7 +72,7 @@ export async function lockUserFunds(
 export async function deductLockedFunds(
   tx: any,
   userId: string,
-  amount: Decimal
+  amount: Decimal,
 ): Promise<void> {
   await tx
     .update(wallet)
@@ -84,16 +83,14 @@ export async function deductLockedFunds(
     .where(eq(wallet.userId, userId));
 }
 
-
 /**
  * Unlock user funds after order is filled
  */
 export async function unlockUserFunds(
   tx: any,
   userId: string,
-  amount: Decimal
+  amount: Decimal,
 ): Promise<void> {
-
   const [userWallet] = await tx
     .select()
     .from(wallet)
@@ -122,7 +119,7 @@ export async function unlockUserFunds(
 export async function creditUserBalance(
   tx: any,
   userId: string,
-  amount: Decimal
+  amount: Decimal,
 ): Promise<void> {
   await tx
     .update(wallet)
@@ -132,5 +129,3 @@ export async function creditUserBalance(
     })
     .where(eq(wallet.userId, userId));
 }
-
-

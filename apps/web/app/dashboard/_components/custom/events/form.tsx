@@ -96,7 +96,7 @@ export function EventForm() {
     const currentTags = form.getValues("tags");
     form.setValue(
       "tags",
-      currentTags.filter((tag) => tag !== tagToRemove)
+      currentTags.filter((tag) => tag !== tagToRemove),
     );
   };
 

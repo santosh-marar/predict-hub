@@ -21,14 +21,14 @@ router.get(
   "/category/:categoryId",
   isAuthenticated,
   requireAdmin,
-  getSubCategoriesByCategoryId
+  getSubCategoriesByCategoryId,
 );
 router.patch("/:id", isAuthenticated, requireAdmin, updateSubCategory);
 router.patch(
   "/:id/toggle",
   isAuthenticated,
   requireAdmin,
-  toggleSubCategoryStatus
+  toggleSubCategoryStatus,
 );
 router.delete("/:id", isAuthenticated, requireAdmin, deleteSubCategory);
 

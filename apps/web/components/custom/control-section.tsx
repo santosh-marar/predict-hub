@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
-import { TrendingUp } from "lucide-react"
+import { TrendingUp } from "lucide-react";
 
 export default function ControlSection() {
   return (
@@ -27,7 +27,7 @@ export default function ControlSection() {
           <div className="grid grid-cols-2 gap-3 max-w-lg">
             {/* India Inflation Card */}
             <Card className="bg-white shadow-md border-0 rounded-xl overflow-hidden">
-              <CardContent >
+              <CardContent>
                 <div className="space-y-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg flex items-center justify-center">
                     <span className="text-lg">🇮🇳</span>
@@ -57,7 +57,7 @@ export default function ControlSection() {
 
             {/* GST Collection Card */}
             <Card className="bg-white shadow-md border-0 rounded-xl overflow-hidden">
-              <CardContent >
+              <CardContent>
                 <div className="space-y-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
                     <span className="text-lg">💰</span>
@@ -88,7 +88,7 @@ export default function ControlSection() {
 
             {/* South Korean Election Card - spans both columns */}
             <Card className="bg-white shadow-md border-0 rounded-xl overflow-hidden col-span-2">
-              <CardContent >
+              <CardContent>
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
                     <span className="text-lg">🗳️</span>
@@ -119,7 +119,6 @@ export default function ControlSection() {
           </div>
         </div>
       </div>
-     
     </section>
   );
 }

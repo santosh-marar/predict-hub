@@ -36,9 +36,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
 import api from "@/lib/axios";
-import { supabase } from "@/lib/supabase";
 import { deleteImageFromSupabase, uploadImageToSupabase } from "@/lib/image";
 import { ImageSelector } from "@/components/custom/image-uploader";
 
@@ -76,7 +74,7 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
   const router = useRouter();
   const isEditMode = !!initialData;
   const queryClient = useQueryClient();
-  
+
   // Track selected file separately from form
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -87,7 +85,8 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
       title: initialData?.title || "",
       description: initialData?.description || "",
       imageUrl: initialData?.imageUrl || "",
-      isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
+      isActive:
+        initialData?.isActive !== undefined ? initialData.isActive : true,
     },
   });
 
@@ -108,24 +107,36 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
     mutationFn: async (data: SubCategoryFormValues) => {
       let finalData = { ...data };
 
-      // Upload image first if there's a selected file
       if (selectedFile) {
         try {
-          const imageUrl = await uploadImageToSupabase(selectedFile, 'sub-categories', 'images');
+          const imageUrl = await uploadImageToSupabase(
+            selectedFile,
+            "sub-categories",
+            "images",
+          );
           finalData.imageUrl = imageUrl;
-          
-          // Delete old image if updating and there was an existing image
-          if (isEditMode && initialData?.imageUrl && initialData.imageUrl !== imageUrl) {
-            await deleteImageFromSupabase(initialData.imageUrl, 'sub-categories');
+
+          // Delete old image if we are updating and there was an image already exist
+          if (
+            isEditMode &&
+            initialData?.imageUrl &&
+            initialData.imageUrl !== imageUrl
+          ) {
+            await deleteImageFromSupabase(
+              initialData.imageUrl,
+              "sub-categories",
+            );
           }
         } catch (error: any) {
           throw new Error(`Image upload failed: ${error.message}`);
         }
       }
 
-      // Make API call with the data including the new image URL
       if (isEditMode && initialData?.id) {
-        const response = await api.put(`/sub-category/${initialData.id}`, finalData);
+        const response = await api.put(
+          `/sub-category/${initialData.id}`,
+          finalData,
+        );
         return response.data;
       } else {
         const response = await api.post("/sub-category", finalData);
@@ -135,9 +146,9 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sub-category"] });
       toast.success(
-        `Sub-category ${isEditMode ? "updated" : "created"} successfully!`
+        `Sub-category ${isEditMode ? "updated" : "created"} successfully!`,
       );
-      
+
       if (!isEditMode) {
         form.reset({
           categoryId: "",
@@ -161,10 +172,6 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
   });
 
   const onSubmit = (data: SubCategoryFormValues) => {
-    console.log('Sub-category form data being submitted:', {
-      formData: data,
-      selectedFile: selectedFile?.name || 'No file selected'
-    });
     mutation.mutate(data);
   };
 
@@ -177,10 +184,9 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
           {isEditMode ? "Edit Sub-category" : "Create New Sub-category"}
         </CardTitle>
         <CardDescription>
-          {isEditMode 
-            ? "Update your sub-category information" 
-            : "Add a new sub-category under a parent category"
-          }
+          {isEditMode
+            ? "Update your sub-category information"
+            : "Add a new sub-category under a parent category"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -261,10 +267,10 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
             <FormItem>
               <FormLabel>Sub-category Image</FormLabel>
               <FormControl>
-                <ImageSelector  
+                <ImageSelector
                   selectedFile={selectedFile}
                   onFileSelect={setSelectedFile}
-                  existingImageUrl={form.getValues('imageUrl')}
+                  existingImageUrl={form.getValues("imageUrl")}
                   disabled={isLoading}
                 />
               </FormControl>
@@ -305,13 +311,15 @@ export default function SubCategoryForm({ initialData }: SubCategoryFormProps) {
         >
           Cancel
         </Button>
-        <Button 
-          onClick={form.handleSubmit(onSubmit)} 
+        <Button
+          onClick={form.handleSubmit(onSubmit)}
           disabled={isLoading}
           className="min-w-[120px]"
         >
           {isLoading
-            ? selectedFile ? "Uploading..." : "Saving..."
+            ? selectedFile
+              ? "Uploading..."
+              : "Saving..."
             : isEditMode
               ? "Update Sub-category"
               : "Create Sub-category"}

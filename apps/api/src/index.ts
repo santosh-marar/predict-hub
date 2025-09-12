@@ -34,7 +34,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
-  })
+  }),
 );
 
 // Better Auth handler with configured auth instance

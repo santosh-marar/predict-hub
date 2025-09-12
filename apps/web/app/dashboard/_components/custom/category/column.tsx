@@ -28,10 +28,8 @@ export type CategoryColumn = {
   parentCategory?: string;
 };
 
-
-
 export const categoryColumns = (
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
 ): ColumnDef<CategoryColumn>[] => [
   {
     accessorKey: "title",
@@ -101,9 +99,10 @@ export const categoryColumns = (
                 <span>Edit</span>
               </Link>
             </DropdownMenuItem>
-              <DeleteConfirmationDialog
-                onConfirm={() => handleDelete(category.id)}
-                itemName="Category"/>
+            <DeleteConfirmationDialog
+              onConfirm={() => handleDelete(category.id)}
+              itemName="Category"
+            />
           </DropdownMenuContent>
         </DropdownMenu>
       );

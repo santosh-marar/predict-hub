@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
-import { Card, CardContent } from "@repo/ui/components/card"
+import { Avatar, AvatarFallback } from "@repo/ui/components/avatar";
+import { Card, CardContent } from "@repo/ui/components/card";
 
 export default function OrderBookActivityTab() {
   const activities = [
@@ -27,7 +27,7 @@ export default function OrderBookActivityTab() {
       rightPrice: "₹0.5",
       timestamp: "a few seconds ago",
     },
-  ]
+  ];
 
   return (
     <Card className="border-none shadow-none p-0">

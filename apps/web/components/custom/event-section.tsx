@@ -4,7 +4,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
-import { TrendingUp, ChevronLeft, ChevronRight, ArrowBigDownDash } from "lucide-react";
+import {
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight,
+  ArrowBigDownDash,
+} from "lucide-react";
 import Image from "next/image";
 import api from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
@@ -49,7 +54,7 @@ export default function EventsSection() {
   const getSubcategories = async () => {
     if (activeCategoryId) {
       const response = await api.get(
-        `/sub-category?categoryId=${activeCategoryId}`
+        `/sub-category?categoryId=${activeCategoryId}`,
       );
       return response.data;
     } else {
@@ -65,7 +70,7 @@ export default function EventsSection() {
   } = useQuery({
     queryKey: ["subcategories", activeCategoryId],
     queryFn: getSubcategories,
-    enabled: true, 
+    enabled: true,
   });
 
   const getEvents = async () => {
@@ -104,7 +109,7 @@ export default function EventsSection() {
   const prevSubcategory = () => {
     if (subcategories.length > 0) {
       setCurrentSubcategoryIndex(
-        (prev) => (prev - 1 + subcategories.length) % subcategories.length
+        (prev) => (prev - 1 + subcategories.length) % subcategories.length,
       );
     }
   };
@@ -138,11 +143,11 @@ export default function EventsSection() {
   };
 
   const handleSubcategoryClick = (subCategoryTitle) => {
-   <Link href={`/events/${subCategoryTitle}`}></Link>
+    <Link href={`/events/${subCategoryTitle}`}></Link>;
   };
 
   const handleEventClick = (eventTitle) => {
-    <Link href={`/events/details/${eventTitle}`}></Link>
+    <Link href={`/events/details/${eventTitle}`}></Link>;
   };
 
   if (isLoadingCategories || isLoadingEvents) {

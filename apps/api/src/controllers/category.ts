@@ -4,8 +4,8 @@ import { eq, asc, or } from "drizzle-orm";
 import asyncMiddleware from "src/middleware/async-middleware";
 
 // Get all active categories
-export const getCategories = asyncMiddleware( async (req: Request, res: Response) => {
-
+export const getCategories = asyncMiddleware(
+  async (req: Request, res: Response) => {
     const categories = await db
       .select()
       .from(category)
@@ -16,7 +16,8 @@ export const getCategories = asyncMiddleware( async (req: Request, res: Response
       success: true,
       data: categories,
     });
-});
+  },
+);
 
 // Get category by ID or slug
 export const getCategoryById = asyncMiddleware(
@@ -40,11 +41,12 @@ export const getCategoryById = asyncMiddleware(
       success: true,
       data: result[0],
     });
-  }
+  },
 );
 
 // Create new category (admin only)
-export const createCategory = asyncMiddleware( async (req: Request, res: Response) => {
+export const createCategory = asyncMiddleware(
+  async (req: Request, res: Response) => {
     const { title, isActive, description, imageUrl } = req.body;
 
     if (!title) {
@@ -63,7 +65,7 @@ export const createCategory = asyncMiddleware( async (req: Request, res: Respons
         slug,
         description,
         imageUrl,
-        isActive
+        isActive,
       })
       .returning();
 
@@ -71,11 +73,12 @@ export const createCategory = asyncMiddleware( async (req: Request, res: Respons
       success: true,
       data: newCategory[0],
     });
-})
+  },
+);
 
 // Update category (admin only)
-export const updateCategory = asyncMiddleware( async (req: Request, res: Response) => {
-
+export const updateCategory = asyncMiddleware(
+  async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const { title, description, imageUrl, isActive } = req.body;
@@ -106,10 +109,12 @@ export const updateCategory = asyncMiddleware( async (req: Request, res: Respons
       success: true,
       data: updated[0],
     });
-})
+  },
+);
 
 // Delete category (admin only)
-export const deleteCategory = asyncMiddleware( async (req: Request, res: Response) => {
+export const deleteCategory = asyncMiddleware(
+  async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const deleted = await db
@@ -128,4 +133,5 @@ export const deleteCategory = asyncMiddleware( async (req: Request, res: Respons
       success: true,
       message: "Category deleted successfully",
     });
-});
+  },
+);

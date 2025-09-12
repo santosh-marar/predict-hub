@@ -1,10 +1,22 @@
 // routes/events.ts
 import { Router } from "express";
-import {createEvent, getEvents, getEventById, updateEvent, deleteEvent, resolveEvent, updateEventStatus, getUserEvents, getFeaturedEvents, getEventStats, batchUpdateEventStatus, getProbabilityChart} from "../controllers/event";  
+import {
+  createEvent,
+  getEvents,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+  resolveEvent,
+  updateEventStatus,
+  getUserEvents,
+  getFeaturedEvents,
+  getEventStats,
+  batchUpdateEventStatus,
+  getProbabilityChart,
+} from "../controllers/event";
 import { isAuthenticated, requireAdmin } from "src/middleware/auth";
 
-
-const router:Router = Router();
+const router: Router = Router();
 
 router.post("/", isAuthenticated, requireAdmin, createEvent);
 router.get("/", getEvents);
@@ -20,7 +32,7 @@ router.patch(
   "/batch/status",
   isAuthenticated,
   requireAdmin,
-  batchUpdateEventStatus
+  batchUpdateEventStatus,
 );
 router.get("/:eventId/probability-chart", getProbabilityChart);
 

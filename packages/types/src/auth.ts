@@ -24,4 +24,3 @@ export interface SessionUser {
   banReason?: string | null;
   banExpires?: Date | null;
 }
-

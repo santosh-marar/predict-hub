@@ -150,7 +150,12 @@ export default function Footer() {
                 width={50}
                 height={50}
               />
-              <Image src="/google-firebase.avif" alt="firebase" width={50} height={50} />
+              <Image
+                src="/google-firebase.avif"
+                alt="firebase"
+                width={50}
+                height={50}
+              />
             </div>
           </div>
         </div>

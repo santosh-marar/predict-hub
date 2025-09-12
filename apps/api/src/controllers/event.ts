@@ -1,5 +1,12 @@
 import type { Request, Response } from "express";
-import { db, event, eventInsertSchema, eventUpdateSchema, category, subCategory } from "@repo/db";
+import {
+  db,
+  event,
+  eventInsertSchema,
+  eventUpdateSchema,
+  category,
+  subCategory,
+} from "@repo/db";
 import {
   eq,
   and,
@@ -82,10 +89,9 @@ const createErrorResponse = (message: string, errors?: any[]): ApiResponse => ({
   errors,
 });
 
-
 const validateStatusTransition = (
   currentStatus: EventStatus,
-  newStatus: EventStatus
+  newStatus: EventStatus,
 ): boolean => {
   const validTransitions: Record<EventStatus, EventStatus[]> = {
     draft: ["active", "cancelled"],
@@ -129,7 +135,7 @@ export const createEvent = asyncMiddleware(
     res
       .status(201)
       .json(createResponse(newEvent[0], "Event created successfully"));
-  }
+  },
 );
 
 export const getEvents = asyncMiddleware(
@@ -166,8 +172,8 @@ export const getEvents = asyncMiddleware(
       conditions.push(
         or(
           ilike(event.title, `%${search}%`),
-          ilike(event.description, `%${search}%`)
-        )
+          ilike(event.description, `%${search}%`),
+        ),
       );
     }
     // Filter by category name (using the joined category table)
@@ -251,7 +257,7 @@ export const getEvents = asyncMiddleware(
         hasPrev: page > 1,
       },
     });
-  }
+  },
 );
 
 export const getEventById = asyncMiddleware(
@@ -284,7 +290,7 @@ export const getEventById = asyncMiddleware(
     }
 
     res.json(createResponse(eventData));
-  }
+  },
 );
 
 export const updateEvent = asyncMiddleware(
@@ -322,7 +328,7 @@ export const updateEvent = asyncMiddleware(
       .returning();
 
     res.json(createResponse(updatedEvent[0], "Event updated successfully"));
-  }
+  },
 );
 
 export const deleteEvent = asyncMiddleware(
@@ -347,7 +353,7 @@ export const deleteEvent = asyncMiddleware(
     await db.delete(event).where(eq(event.id, id));
 
     res.json(createResponse(null, "Event deleted successfully"));
-  }
+  },
 );
 
 export const resolveEvent = asyncMiddleware(
@@ -393,7 +399,7 @@ export const resolveEvent = asyncMiddleware(
       .returning();
 
     res.json(createResponse(resolvedEvent[0], "Event resolved successfully"));
-  }
+  },
 );
 
 export const updateEventStatus = asyncMiddleware(
@@ -418,8 +424,8 @@ export const updateEventStatus = asyncMiddleware(
         .status(400)
         .json(
           createErrorResponse(
-            `Cannot transition from ${currentStatus} to ${newStatus}`
-          )
+            `Cannot transition from ${currentStatus} to ${newStatus}`,
+          ),
         );
     }
 
@@ -433,9 +439,9 @@ export const updateEventStatus = asyncMiddleware(
       .returning();
 
     res.json(
-      createResponse(updatedEvent[0], "Event status updated successfully")
+      createResponse(updatedEvent[0], "Event status updated successfully"),
     );
-  }
+  },
 );
 
 export const getUserEvents = asyncMiddleware(
@@ -485,7 +491,7 @@ export const getUserEvents = asyncMiddleware(
         hasPrev: page > 1,
       },
     });
-  }
+  },
 );
 
 export const getFeaturedEvents = asyncMiddleware(
@@ -503,14 +509,14 @@ export const getFeaturedEvents = asyncMiddleware(
         and(
           eq(event.isFeatured, true),
           eq(event.isPublic, true),
-          eq(event.status, "active")
-        )
+          eq(event.status, "active"),
+        ),
       )
       .orderBy(desc(event.totalVolume))
       .limit(limit);
 
     res.json(createResponse(featuredEvents));
-  }
+  },
 );
 
 export const getEventStats = asyncMiddleware(
@@ -537,10 +543,11 @@ export const getEventStats = asyncMiddleware(
     }
 
     res.json(createResponse(eventStats[0]));
-  }
+  },
 );
 
-export const getProbabilityChart = asyncMiddleware(async (req: Request, res: Response) => {
+export const getProbabilityChart = asyncMiddleware(
+  async (req: Request, res: Response) => {
     const eventId = req.params.eventId;
 
     const trades = await db.query.trade.findMany({
@@ -571,7 +578,8 @@ export const getProbabilityChart = asyncMiddleware(async (req: Request, res: Res
     }
 
     res.json(chartData);
-})
+  },
+);
 
 // Batch operations
 export const batchUpdateEventStatus = asyncMiddleware(
@@ -599,7 +607,7 @@ export const batchUpdateEventStatus = asyncMiddleware(
 
         if (!validateStatusTransition(currentStatus, newStatus)) {
           throw new Error(
-            `Cannot transition event ${eventId} from ${currentStatus} to ${newStatus}`
+            `Cannot transition event ${eventId} from ${currentStatus} to ${newStatus}`,
           );
         }
 
@@ -611,7 +619,7 @@ export const batchUpdateEventStatus = asyncMiddleware(
           })
           .where(eq(event.id, eventId))
           .returning();
-      })
+      }),
     );
 
     const successful = results.filter((r) => r.status === "fulfilled").length;
@@ -628,8 +636,8 @@ export const batchUpdateEventStatus = asyncMiddleware(
             error: result.status === "rejected" ? result.reason.message : null,
           })),
         },
-        `Batch update completed: ${successful} successful, ${failed} failed`
-      )
+        `Batch update completed: ${successful} successful, ${failed} failed`,
+      ),
     );
-  }
+  },
 );

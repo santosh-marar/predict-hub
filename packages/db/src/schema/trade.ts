@@ -2,7 +2,14 @@ import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { event } from "./event";
 import { order } from "./order";
-import { uuid, text, timestamp, decimal, index, pgTable } from "drizzle-orm/pg-core";
+import {
+  uuid,
+  text,
+  timestamp,
+  decimal,
+  index,
+  pgTable,
+} from "drizzle-orm/pg-core";
 
 export const trade = pgTable(
   "trade",
@@ -51,7 +58,7 @@ export const trade = pgTable(
     executedAtIdx: index("trades_executed_at_idx").on(table.executedAt),
     makerOrderIdx: index("trades_maker_order_idx").on(table.makerOrderId),
     takerOrderIdx: index("trades_taker_order_idx").on(table.takerOrderId),
-  })
+  }),
 );
 
 export const tradeRelation = relations(trade, ({ one }) => ({

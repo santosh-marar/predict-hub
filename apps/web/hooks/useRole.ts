@@ -3,14 +3,8 @@
 import { useSession } from "@/lib/auth-client";
 import { Role } from "@repo/types";
 
-
 export const useRole = () => {
-     const {
-       data: session,
-       isPending, 
-       error, 
-       refetch,
-     } = useSession();
+  const { data: session, isPending, error, refetch } = useSession();
   const user = session?.user;
 
   return {

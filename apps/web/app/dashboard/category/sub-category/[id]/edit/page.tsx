@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import SubCategoryForm from "@/app/dashboard/_components/custom/sub-category/form";
 
 export default async function EditCategoryPage(props: {
-  params: Promise<{ id: string }>; 
+  params: Promise<{ id: string }>;
 }) {
   const { id: categoryId } = await props.params;
 
@@ -21,7 +21,7 @@ export default async function EditCategoryPage(props: {
         },
         // Optional: enable revalidation if needed
         cache: "no-store",
-      }
+      },
     );
 
     if (!res.ok) throw new Error("Failed to fetch category");
@@ -31,7 +31,7 @@ export default async function EditCategoryPage(props: {
 
     initialData = json.data;
   } catch (error) {
-    return notFound(); 
+    return notFound();
   }
 
   return (

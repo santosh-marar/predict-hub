@@ -33,7 +33,7 @@ export default function SignUp() {
             alert("Check your email for verification link.");
             // window.location.href = "/dashboard"; // Or redirect to sign-in
           },
-        }
+        },
       )
       .catch((error: any) => {
         console.error("Error signing up:", error);

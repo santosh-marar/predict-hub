@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/card";
 import { Quote } from "lucide-react";
 import Image from "next/image";
 
@@ -32,7 +37,6 @@ const people = [
     image: "/sabar.avif",
   },
 ];
-
 
 export default function NewsSection() {
   return (

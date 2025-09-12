@@ -31,7 +31,6 @@ export function UsersList() {
     queryFn: fetchUsers,
   });
 
-
   if (isLoading) return <div>Loading users...</div>;
   if (isError) return <div>Error: {(error as Error).message}</div>;
   if (!data || !Array.isArray(data.users) || data.users.length === 0)

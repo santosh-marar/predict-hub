@@ -14,8 +14,7 @@ export default function VideoPlayer() {
       setVideoError(true);
     };
 
-    const handleCanPlay = () => {
-    };
+    const handleCanPlay = () => {};
 
     // Add event listeners
     video.addEventListener("error", handleError);

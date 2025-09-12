@@ -4,17 +4,17 @@ import SubCategoryForm from "../../_components/custom/sub-category/form";
 import SubCategoriesList from "../../_components/custom/sub-category/table";
 
 export default async function SubCategoriesPage() {
-//   const cookieStore = await cookies();
+  //   const cookieStore = await cookies();
 
-//   const category = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sub-category`, {
-//     headers: {
-//       Cookie: cookieStore.toString(),
-//       "Content-Type": "application/json",
-//     },
-//   });
+  //   const category = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sub-category`, {
+  //     headers: {
+  //       Cookie: cookieStore.toString(),
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
 
-//   const data = await category.json();
-//   console.log(data)
+  //   const data = await category.json();
+  //   console.log(data)
 
   return (
     <div className="px-10 py-4">

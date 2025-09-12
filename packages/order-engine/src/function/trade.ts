@@ -6,7 +6,7 @@ import { trade } from "@repo/db";
  */
 export async function insertTradeRecord(
   tx: any,
-  tradeExecution: TradeExecution
+  tradeExecution: TradeExecution,
 ): Promise<void> {
   await tx.insert(trade).values({
     makerUserId: tradeExecution.makerUserId,

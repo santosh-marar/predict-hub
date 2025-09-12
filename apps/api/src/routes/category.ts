@@ -1,8 +1,14 @@
 import express, { Router } from "express";
-import { getCategories, getCategoryById, createCategory, updateCategory, deleteCategory } from "@controllers/category";
+import {
+  getCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "@controllers/category";
 import { isAuthenticated, requireAdmin } from "src/middleware/auth";
 
-const router:Router = express.Router();
+const router: Router = express.Router();
 
 router.get("/", getCategories);
 router.get("/:id", getCategoryById);

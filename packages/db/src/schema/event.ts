@@ -12,9 +12,13 @@ import { user } from "./auth";
 import { category, subCategory } from "./category";
 import { position } from "./position";
 import { trade } from "./trade";
-import { comment } from "./comment";    
-import { order } from "./order";  
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import { comment } from "./comment";
+import { order } from "./order";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 
 export const event = pgTable(
   "event",
@@ -42,15 +46,9 @@ export const event = pgTable(
       .notNull(),
 
     // Trading mechanics
-    totalVolume: decimal("total_volume")
-      .default("10000")
-      .notNull(),
-    totalYesShares: decimal("total_yes_shares")
-      .default("5000")
-      .notNull(),
-    totalNoShares: decimal("total_no_shares")
-      .default("5000")
-      .notNull(),
+    totalVolume: decimal("total_volume").default("10000").notNull(),
+    totalYesShares: decimal("total_yes_shares").default("5000").notNull(),
+    totalNoShares: decimal("total_no_shares").default("5000").notNull(),
 
     // Current prices (0-10)
     lastYesPrice: decimal("last_yes_price", { precision: 15, scale: 5 })
@@ -82,12 +80,12 @@ export const event = pgTable(
     statusIdx: index("events_status_idx").on(table.status),
     endTimeIdx: index("events_end_time_idx").on(table.endTime),
     createdByIdx: index("events_created_by_idx").on(table.createdBy),
-  })
+  }),
 );
 
 export const eventSelectSchema = createSelectSchema(event);
 export const eventInsertSchema = createInsertSchema(event);
-export const eventUpdateSchema= createUpdateSchema(event);
+export const eventUpdateSchema = createUpdateSchema(event);
 
 export const eventRelation = relations(event, ({ one, many }) => ({
   category: one(category, {

@@ -149,7 +149,10 @@ export default function EventDetails() {
         {/* Orderbook Section */}
         {session?.data && (
           <section id="orderbook" className="space-y-6 mb-8">
-            <OrderBookTabs eventId={eventId as string} userId={session?.data?.userId} />
+            <OrderBookTabs
+              eventId={eventId as string}
+              userId={session?.data?.userId}
+            />
           </section>
         )}
 

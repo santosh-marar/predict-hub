@@ -1,7 +1,7 @@
-import { db, category, subCategory } from "@repo/db"
+import { db, category, subCategory } from "@repo/db";
 import { eq, and, desc, asc, ilike, sql, ne } from "drizzle-orm";
-import asyncMiddleware from "../middleware/async-middleware"
-import { createSlug } from "../lib/utils"
+import asyncMiddleware from "../middleware/async-middleware";
+import { createSlug } from "../lib/utils";
 
 // Create sub-category
 export const createSubCategory = asyncMiddleware(async (req, res) => {
@@ -147,7 +147,7 @@ export const getAllSubCategories = asyncMiddleware(async (req, res) => {
     .where(whereClause);
 
   const totalItems = parseInt(
-    (totalCount[0].count as unknown as string) || "0"
+    (totalCount[0].count as unknown as string) || "0",
   );
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -171,7 +171,6 @@ export const getAllSubCategories = asyncMiddleware(async (req, res) => {
     },
   });
 });
-  
 
 // Get sub-category by ID
 export const getSubCategoryById = asyncMiddleware(async (req, res) => {
@@ -256,7 +255,7 @@ export const getSubCategoriesByCategoryId = asyncMiddleware(
         and(
           eq(subCategory.categoryId, categoryId),
           // eq(subCategory.isActive, isActive === "true")
-        )
+        ),
       )
       .orderBy(asc(subCategory.title));
 
@@ -264,7 +263,7 @@ export const getSubCategoriesByCategoryId = asyncMiddleware(
       success: true,
       data: result,
     });
-  }
+  },
 );
 
 // Update sub-category
@@ -358,7 +357,6 @@ export const updateSubCategory = asyncMiddleware(async (req, res) => {
     data: updatedSubCategory[0],
   });
 });
-  
 
 // Toggle sub-category status
 export const toggleSubCategoryStatus = asyncMiddleware(async (req, res) => {

@@ -28,7 +28,7 @@ export type SubCategoryColumn = {
 };
 
 export const subCategoryColumns = (
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
 ): ColumnDef<SubCategoryColumn>[] => [
   {
     accessorKey: "title",

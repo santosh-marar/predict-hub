@@ -75,14 +75,14 @@ export default function OrderBookTabs({ eventId, userId }: OrderBookProps) {
       .fill(null)
       .map(
         (_, index) =>
-          yesOrdersData[index] || { price: "0", quantity: "0", isAsk: false }
+          yesOrdersData[index] || { price: "0", quantity: "0", isAsk: false },
       );
 
     const noOrders = Array(5)
       .fill(null)
       .map(
         (_, index) =>
-          noOrdersData[index] || { price: "0", quantity: "0", isAsk: false }
+          noOrdersData[index] || { price: "0", quantity: "0", isAsk: false },
       );
 
     return { yesOrders, noOrders };

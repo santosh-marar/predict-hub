@@ -17,19 +17,17 @@ export enum Role {
 export const isAuthenticated = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-   	const session = await auth.api.getSession({
+    const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     });
-
 
     if (!session) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
-
 
     req.user = session.user;
     next();

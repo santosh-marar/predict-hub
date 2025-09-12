@@ -4,7 +4,7 @@ import EventEditForm from "../../../_components/custom/events/edit-form";
 import { cookies } from "next/headers";
 
 export default async function EditEventPage(props: {
-  params: Promise<{ id: string }>; 
+  params: Promise<{ id: string }>;
 }) {
   const { id: eventId } = await props.params;
 
@@ -21,7 +21,7 @@ export default async function EditEventPage(props: {
         },
         // Optional: enable revalidation if needed
         cache: "no-store",
-      }
+      },
     );
 
     if (!res.ok) throw new Error("Failed to fetch event");
@@ -31,7 +31,7 @@ export default async function EditEventPage(props: {
 
     initialData = json.data;
   } catch (error) {
-    return notFound(); 
+    return notFound();
   }
 
   return (

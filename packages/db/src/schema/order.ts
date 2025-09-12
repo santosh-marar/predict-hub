@@ -1,6 +1,13 @@
 import { user } from "./auth";
 import { event } from "./event";
-import { uuid, text, timestamp, decimal, index, pgTable } from "drizzle-orm/pg-core";
+import {
+  uuid,
+  text,
+  timestamp,
+  decimal,
+  index,
+  pgTable,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import {
   createInsertSchema,
@@ -42,7 +49,10 @@ export const order = pgTable(
 
     // Pricing
     limitPrice: decimal("limit_price", { precision: 15, scale: 5 }), // null for market orders
-    averageFillPrice: decimal("average_fill_price", { precision: 15, scale: 5 }),
+    averageFillPrice: decimal("average_fill_price", {
+      precision: 15,
+      scale: 5,
+    }),
 
     // Status and timing
     status: text("status", {
@@ -52,7 +62,7 @@ export const order = pgTable(
       .notNull(),
     timeInForce: text("time_in_force", { enum: ["GTC", "IOC", "FOK"] })
       .default("GTC")
-      .notNull(), 
+      .notNull(),
     expiresAt: timestamp("expires_at"),
 
     // Execution tracking
@@ -73,15 +83,15 @@ export const order = pgTable(
       table.side,
       table.type,
       table.limitPrice,
-      table.createdAt
+      table.createdAt,
     ),
     createdAtIdx: index("orders_created_at_idx").on(table.createdAt),
-  })
+  }),
 );
 
 export const orderSelectSchema = createSelectSchema(order);
-export const orderInsertSchema = createInsertSchema(order); 
-export const orderUpdateSchema= createUpdateSchema(order);
+export const orderInsertSchema = createInsertSchema(order);
+export const orderUpdateSchema = createUpdateSchema(order);
 
 export const orderRelation = relations(order, ({ one, many }) => ({
   user: one(user, {

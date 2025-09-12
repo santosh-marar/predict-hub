@@ -1,8 +1,5 @@
 import { AppSidebar } from "@/app/dashboard/_components/ui/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@repo/ui/components/sidebar";
+import { SidebarInset, SidebarProvider } from "@repo/ui/components/sidebar";
 import DashboardHeader from "./_components/custom/dashboard-header";
 
 export default function AdminLayout({
@@ -17,7 +14,6 @@ export default function AdminLayout({
         <main className="">
           <DashboardHeader />
           {children}
-
         </main>
       </SidebarInset>
     </SidebarProvider>

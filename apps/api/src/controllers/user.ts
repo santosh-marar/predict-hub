@@ -46,7 +46,7 @@ export const getProfile = asyncMiddleware(
       wallet: userWallet[0] || null,
       stats: stats[0],
     });
-  }
+  },
 );
 
 export const updateProfile = asyncMiddleware(
@@ -69,7 +69,7 @@ export const updateProfile = asyncMiddleware(
     }
 
     res.json({ user: updatedUser[0] });
-  }
+  },
 );
 
 export const getPositions = async (req: AuthRequest, res: Response) => {
@@ -90,7 +90,7 @@ export const getPositions = async (req: AuthRequest, res: Response) => {
     ] as const;
     if (validStatuses.includes(status as any)) {
       whereConditions.push(
-        eq(event.status, status as (typeof validStatuses)[number])
+        eq(event.status, status as (typeof validStatuses)[number]),
       );
     }
   }
@@ -178,5 +178,5 @@ export const getLeaderboardPosition = asyncMiddleware(
       position: userPosition ? parseInt(userPosition.rank as string) : null,
       totalPnl: userPosition ? userPosition.totalPnl : "0",
     });
-  }
+  },
 );

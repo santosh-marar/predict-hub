@@ -28,18 +28,16 @@ interface TradingSidebarProps {
   eventId: string;
 }
 
-export default function TradingSidebar({
-  eventId,
-}: TradingSidebarProps) {
+export default function TradingSidebar({ eventId }: TradingSidebarProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const session = useSession();
 
   const { orderBookData } = useOrderBook(eventId, session?.data?.user?.id);
-  
+
   // @ts-ignore
   const lastYesPrice = orderBookData?.lastYesPrice || 5.0; // Fallback price
-  // @ts-ignore  
+  // @ts-ignore
   const lastNoPrice = orderBookData?.lastNoPrice || 5.0; // Fallback price
 
   const [selectedOption, setSelectedOption] = useState<"yes" | "no">("yes");
@@ -49,7 +47,8 @@ export default function TradingSidebar({
 
   // Update price when selectedOption or orderBookData changes
   useEffect(() => {
-    const currentMarketPrice = selectedOption === "yes" ? lastYesPrice : lastNoPrice;
+    const currentMarketPrice =
+      selectedOption === "yes" ? lastYesPrice : lastNoPrice;
     if (currentMarketPrice && currentMarketPrice > 0) {
       setPrice(currentMarketPrice);
     }
@@ -60,7 +59,7 @@ export default function TradingSidebar({
     : selectedOption === "yes"
       ? lastYesPrice
       : lastNoPrice;
-      
+
   const youPut = actualPrice * quantity;
   const youGet = selectedOption === "yes" ? 10.0 * quantity : 10.0 * quantity;
   const potentialProfit = youGet - youPut;
@@ -69,10 +68,16 @@ export default function TradingSidebar({
     e.preventDefault();
 
     // Validate so we valid price
-    const currentPrice = showAdvanced ? price : (selectedOption === "yes" ? lastYesPrice : lastNoPrice);
-    
+    const currentPrice = showAdvanced
+      ? price
+      : selectedOption === "yes"
+        ? lastYesPrice
+        : lastNoPrice;
+
     if (!currentPrice || currentPrice <= 0) {
-      toast.error("Invalid price. Please wait for market data to load or set a valid price.");
+      toast.error(
+        "Invalid price. Please wait for market data to load or set a valid price.",
+      );
       return;
     }
 
@@ -130,7 +135,9 @@ export default function TradingSidebar({
     return (
       <Card className="sticky top-6 shadow-none rounded-2xl mt-6">
         <CardContent className="p-4">
-          <div className="text-center text-gray-500">Loading market data...</div>
+          <div className="text-center text-gray-500">
+            Loading market data...
+          </div>
         </CardContent>
       </Card>
     );
@@ -297,7 +304,9 @@ export default function TradingSidebar({
                     Potential Profit: ₹{potentialProfit.toFixed(1)}
                   </div>
                   <div className="text-xs text-gray-500">
-                    Price: ₹{actualPrice ? Number(actualPrice).toFixed(2) : "-.--"} × {quantity} qty
+                    Price: ₹
+                    {actualPrice ? Number(actualPrice).toFixed(2) : "-.--"} ×{" "}
+                    {quantity} qty
                   </div>
                 </div>
               </div>

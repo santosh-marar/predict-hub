@@ -8,9 +8,8 @@ import { TradeExecution } from "@/types";
  */
 export async function upsertUserPosition(
   tx: any,
-  positionData: any
+  positionData: any,
 ): Promise<void> {
-  
   const existingPosition = await tx
     .select()
     .from(position)
@@ -19,8 +18,8 @@ export async function upsertUserPosition(
         eq(position.userId, positionData.takerUserId),
         eq(position.eventId, positionData.eventId),
         eq(position.side, positionData.side),
-        eq(position.type, positionData.type)
-      )
+        eq(position.type, positionData.type),
+      ),
     )
     .limit(1);
 
@@ -32,13 +31,12 @@ export async function upsertUserPosition(
 
     const newQuantity = existingQuantity.add(positionData.quantity);
     const newTotalInvestment = existingAmount.add(
-      new Decimal(positionData.totalFees)
+      new Decimal(positionData.totalFees),
     );
 
     const newAveragePrice = newQuantity.isZero()
       ? new Decimal(0)
       : newTotalInvestment.div(newQuantity);
-
 
     await tx
       .update(position)
@@ -74,7 +72,7 @@ export async function updateUserPositions(
   tx: any,
   takerOrder: any,
   makerOrder: any,
-  tradeExecution: TradeExecution
+  tradeExecution: TradeExecution,
 ): Promise<void> {
   const quantity = tradeExecution.quantity;
 
@@ -105,7 +103,7 @@ export async function updateUserPositions(
 export async function updateUserPositionAMM(
   tx: any,
   takerOrder: any,
-  tradeExecution: TradeExecution
+  tradeExecution: TradeExecution,
 ): Promise<void> {
   const quantity = tradeExecution.quantity;
 

@@ -9,7 +9,7 @@ interface AboutEventProps {
   endTime: string;
   startTime: string;
   rules: string;
-  eventOverviewAndStatistics:string
+  eventOverviewAndStatistics: string;
 }
 
 export default function AboutEvent({

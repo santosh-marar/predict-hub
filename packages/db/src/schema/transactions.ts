@@ -27,7 +27,15 @@ export const transactions = pgTable(
 
     // Transaction details
     type: text("type", {
-      enum: ["deposit", "withdrawal", "buy", "sell", "payout", "refund", "bonus"],
+      enum: [
+        "deposit",
+        "withdrawal",
+        "buy",
+        "sell",
+        "payout",
+        "refund",
+        "bonus",
+      ],
     }).notNull(),
     side: text("side", { enum: ["yes", "no"] }).notNull(),
     amount: decimal("amount", { precision: 15, scale: 5 }).notNull(),
@@ -69,7 +77,7 @@ export const transactions = pgTable(
     typeIdx: index("transactions_type_idx").on(table.type),
     statusIdx: index("transactions_status_idx").on(table.status),
     createdAtIdx: index("transactions_created_at_idx").on(table.createdAt),
-  })
+  }),
 );
 
 export const transactionSelectSchema = createSelectSchema(transactions);

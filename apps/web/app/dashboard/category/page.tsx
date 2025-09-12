@@ -3,7 +3,6 @@ import CategoryForm from "../_components/custom/category/form";
 import CategoriesList from "../_components/custom/category/table";
 
 export default async function CategoriesPage() {
-
   return (
     <div className="px-10 py-4">
       <div className="flex justify-between items-center mb-2">

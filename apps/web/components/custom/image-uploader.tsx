@@ -10,26 +10,28 @@ interface ImageSelectorProps {
   disabled?: boolean;
 }
 
-export function ImageSelector({ 
-  selectedFile, 
-  onFileSelect, 
+export function ImageSelector({
+  selectedFile,
+  onFileSelect,
   existingImageUrl,
-  disabled = false 
+  disabled = false,
 }: ImageSelectorProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(existingImageUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    existingImageUrl || null,
+  );
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    
+
     if (file) {
       // Validate file
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file');
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file");
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size must be less than 5MB');
+        toast.error("File size must be less than 5MB");
         return;
       }
 
@@ -41,15 +43,15 @@ export function ImageSelector({
   };
 
   const removeImage = () => {
-    if (previewUrl && previewUrl.startsWith('blob:')) {
+    if (previewUrl && previewUrl.startsWith("blob:")) {
       URL.revokeObjectURL(previewUrl);
     }
     setPreviewUrl(null);
     onFileSelect(null);
-    
+
     // Reset file input
-    const input = document.getElementById('image-upload') as HTMLInputElement;
-    if (input) input.value = '';
+    const input = document.getElementById("image-upload") as HTMLInputElement;
+    if (input) input.value = "";
   };
 
   return (
@@ -59,12 +61,12 @@ export function ImageSelector({
           type="button"
           variant="outline"
           disabled={disabled}
-          onClick={() => document.getElementById('image-upload')?.click()}
+          onClick={() => document.getElementById("image-upload")?.click()}
         >
           <Upload className="w-4 h-4 mr-2" />
-          {selectedFile ? 'Change Image' : 'Select Image'}
+          {selectedFile ? "Change Image" : "Select Image"}
         </Button>
-        
+
         <input
           id="image-upload"
           type="file"
@@ -90,7 +92,8 @@ export function ImageSelector({
       {previewUrl ? (
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
-            {selectedFile ? 'Selected:' : 'Current:'} {selectedFile?.name || 'Existing image'}
+            {selectedFile ? "Selected:" : "Current:"}{" "}
+            {selectedFile?.name || "Existing image"}
           </p>
           <div className="relative w-32 h-32 rounded-md overflow-hidden border">
             <img

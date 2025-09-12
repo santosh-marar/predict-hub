@@ -25,11 +25,11 @@ interface UseOrderBookReturn {
 
 export function useOrderBook(
   eventId: string,
-  userId: string
+  userId: string,
 ): UseOrderBookReturn {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [orderBookData, setOrderBookData] = useState<OrderBookData | null>(
-    null
+    null,
   );
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -41,7 +41,7 @@ export function useOrderBook(
       {
         transports: ["websocket"],
         autoConnect: true,
-      }
+      },
     );
 
     newSocket.on("connect", () => {
@@ -74,7 +74,7 @@ export function useOrderBook(
         setError(null);
       } else {
         console.warn(
-          `Received update for incorrect eventId: ${data.eventId}, expected: ${eventId}`
+          `Received update for incorrect eventId: ${data.eventId}, expected: ${eventId}`,
         );
       }
     });
@@ -114,7 +114,6 @@ export function useOrderBook(
 
   const unsubscribeFromOrderBook = useCallback(() => {
     if (!socket) return;
-
 
     socket.emit("unsubscribeFromOrderBook", {
       eventId,

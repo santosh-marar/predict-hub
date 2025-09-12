@@ -1,12 +1,11 @@
-"use client"
+"use client";
 
 import { getMinutesLeft } from "@/lib/utils";
 import { ExpiresIn } from "@/components/custom/expire-in";
 import Image from "next/image";
-import {Card, CardContent} from "@repo/ui/components/card";
+import { Card, CardContent } from "@repo/ui/components/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
 
 export interface Event {
   id: string;
@@ -35,8 +34,7 @@ export interface Event {
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
   createdBy: string;
-};
-
+}
 
 interface EventCardProps {
   events: Event[];
@@ -44,7 +42,6 @@ interface EventCardProps {
 }
 
 const EventCard = ({ events, filterExpiresInMinutes }: EventCardProps) => {
-
   const filteredEvents = filterExpiresInMinutes
     ? events.filter((event) => {
         const minutesLeft = getMinutesLeft(event.endTime);

@@ -14,9 +14,7 @@ export default function CTASection() {
               on your opinions?
             </h2>
 
-            <Button
-              className="bg-transparent border-2 border-white text-white rounded-full text-lg w-80 h-16"
-            >
+            <Button className="bg-transparent border-2 border-white text-white rounded-full text-lg w-80 h-16">
               Download App
               <ArrowRight size={32} className="ml-2 w-16 h-16" />
             </Button>

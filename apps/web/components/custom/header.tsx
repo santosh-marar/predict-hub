@@ -29,7 +29,7 @@ export default function Header() {
           `http://localhost:8080/api/v1/wallet/${user?.id}`,
           {
             credentials: "include",
-          }
+          },
         );
         const data = await response.json();
         setWallet(data?.data);
@@ -44,7 +44,7 @@ export default function Header() {
   }, [user?.id]);
 
   // @ts-ignore
-  const userBalance = wallet?.balance;  
+  const userBalance = wallet?.balance;
 
   if (user) {
     return (

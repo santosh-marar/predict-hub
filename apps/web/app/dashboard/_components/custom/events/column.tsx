@@ -31,7 +31,7 @@ export type EventColumn = {
 };
 
 export const eventColumns = (
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
 ): ColumnDef<EventColumn>[] => [
   {
     accessorKey: "title",
@@ -126,7 +126,7 @@ export const eventColumns = (
 
       const formattedDate = format(
         new Date(dateValue),
-        "MMM dd, yyyy, hh:mm a"
+        "MMM dd, yyyy, hh:mm a",
       );
 
       return (
@@ -167,7 +167,7 @@ export const eventColumns = (
 
       const formattedDate = format(
         new Date(dateValue),
-        "MMM dd, yyyy, hh:mm a"
+        "MMM dd, yyyy, hh:mm a",
       );
 
       return (
@@ -208,7 +208,7 @@ export const eventColumns = (
 
       const formattedDate = format(
         new Date(dateValue),
-        "MMM dd, yyyy, hh:mm a"
+        "MMM dd, yyyy, hh:mm a",
       );
 
       return (

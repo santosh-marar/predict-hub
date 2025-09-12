@@ -53,11 +53,11 @@ export const position = pgTable(
   (table) => ({
     userEventIdx: index("positions_user_event_idx").on(
       table.userId,
-      table.eventId
+      table.eventId,
     ),
     userIdx: index("positions_user_idx").on(table.userId),
     eventIdx: index("positions_event_idx").on(table.eventId),
-  })
+  }),
 );
 
 export const positionSelectSchema = createSelectSchema(position);

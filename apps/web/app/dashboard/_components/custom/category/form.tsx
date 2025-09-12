@@ -41,7 +41,7 @@ const categoryFormSchema = z.object({
     .max(100, "Title must be less than 100 characters"),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
-  isActive: z.boolean()
+  isActive: z.boolean(),
 });
 
 type CategoryFormValues = {
@@ -65,7 +65,7 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
   const router = useRouter();
   const isEditMode = !!initialData;
   const queryClient = useQueryClient();
-  
+
   // Track selected file separately from form
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -75,7 +75,8 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
       title: initialData?.title || "",
       description: initialData?.description || "",
       imageUrl: initialData?.imageUrl || "",
-      isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
+      isActive:
+        initialData?.isActive !== undefined ? initialData.isActive : true,
     },
   });
 
@@ -87,9 +88,13 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
         try {
           const imageUrl = await uploadImageToSupabase(selectedFile);
           finalData.imageUrl = imageUrl;
-          
+
           // Delete old image if updating and there was an existing image
-          if (isEditMode && initialData?.imageUrl && initialData.imageUrl !== imageUrl) {
+          if (
+            isEditMode &&
+            initialData?.imageUrl &&
+            initialData.imageUrl !== imageUrl
+          ) {
             await deleteImageFromSupabase(initialData.imageUrl);
           }
         } catch (error: any) {
@@ -98,7 +103,10 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
       }
 
       if (isEditMode && initialData?.id) {
-        const response = await api.put(`/category/${initialData.id}`, finalData);
+        const response = await api.put(
+          `/category/${initialData.id}`,
+          finalData,
+        );
         return response.data;
       } else {
         const response = await api.post("/category", finalData);
@@ -108,9 +116,9 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["category"] });
       toast.success(
-        `Category ${isEditMode ? "updated" : "created"} successfully!`
+        `Category ${isEditMode ? "updated" : "created"} successfully!`,
       );
-      
+
       if (!isEditMode) {
         form.reset({
           title: "",
@@ -145,10 +153,9 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
           {isEditMode ? "Edit Category" : "Create New Category"}
         </CardTitle>
         <CardDescription>
-          {isEditMode 
-            ? "Update your category information" 
-            : "Add a new category to your collection"
-          }
+          {isEditMode
+            ? "Update your category information"
+            : "Add a new category to your collection"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -200,7 +207,7 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
                 <ImageSelector
                   selectedFile={selectedFile}
                   onFileSelect={setSelectedFile}
-                  existingImageUrl={form.getValues('imageUrl')}
+                  existingImageUrl={form.getValues("imageUrl")}
                   disabled={isLoading}
                 />
               </FormControl>
@@ -241,13 +248,15 @@ export default function CategoryForm({ initialData }: CategoryFormProps) {
         >
           Cancel
         </Button>
-        <Button 
-          onClick={form.handleSubmit(onSubmit)} 
+        <Button
+          onClick={form.handleSubmit(onSubmit)}
           disabled={isLoading}
           className="min-w-[120px]"
         >
           {isLoading
-            ? selectedFile ? "Uploading..." : "Saving..."
+            ? selectedFile
+              ? "Uploading..."
+              : "Saving..."
             : isEditMode
               ? "Update Category"
               : "Create Category"}

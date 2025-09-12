@@ -9,7 +9,7 @@ export async function createTransactionRecords(
   tx: any,
   takerOrder: any,
   makerOrder: any,
-  tradeExecution: TradeExecution
+  tradeExecution: TradeExecution,
 ): Promise<void> {
   const amount = new Decimal(tradeExecution.amount);
   const makerFee = new Decimal(tradeExecution.makerFee);
@@ -51,11 +51,11 @@ export async function createTransactionRecords(
 export async function createTransactionRecordAMM(
   tx: any,
   takerOrder: any,
-  tradeExecution: TradeExecution
+  tradeExecution: TradeExecution,
 ): Promise<void> {
   const amount = new Decimal(tradeExecution.amount);
 
- try{
+  try {
     await tx.insert(transactions).values({
       userId: takerOrder.userId,
       relatedOrderId: tradeExecution.takerOrderId,
@@ -71,7 +71,7 @@ export async function createTransactionRecordAMM(
       createdAt: new Date(),
       completedAt: new Date(),
     });
- }catch(e){
+  } catch (e) {
     console.log("error", e);
- }
+  }
 }

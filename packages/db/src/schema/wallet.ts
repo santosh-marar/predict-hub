@@ -1,10 +1,14 @@
-import { decimal, timestamp,text, uuid, pgTable } from "drizzle-orm/pg-core";
+import { decimal, timestamp, text, uuid, pgTable } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { relations } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 
 export const wallet = pgTable("wallet", {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id")
     .references(() => user.id, { onDelete: "cascade" })
     .unique()
@@ -35,7 +39,7 @@ export const wallet = pgTable("wallet", {
 
 export const walletSelectSchema = createSelectSchema(wallet);
 export const walletInsertSchema = createInsertSchema(wallet);
-export const walletUpdateSchema= createUpdateSchema(wallet);
+export const walletUpdateSchema = createUpdateSchema(wallet);
 
 export const walletRelation = relations(wallet, ({ one }) => ({
   user: one(user, {

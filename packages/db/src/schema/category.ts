@@ -1,4 +1,11 @@
-import { pgTable, uuid, text, serial, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  serial,
+  timestamp,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { event } from "./event";
 import {
@@ -48,6 +55,3 @@ export const subCategoryUpdateSchema = createUpdateSchema(subCategory);
 export const subCategoryRelation = relations(subCategory, ({ many }) => ({
   event: many(event),
 }));
-
-
-

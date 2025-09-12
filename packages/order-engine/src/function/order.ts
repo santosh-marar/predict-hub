@@ -10,7 +10,7 @@ export async function createLimitOrder(
   tx: any,
   orderData: OrderData,
   orderAmounts: any,
-  expiresAt: Date
+  expiresAt: Date,
 ) {
   const [newOrder] = await tx
     .insert(order)
@@ -40,7 +40,7 @@ export async function createMarketOrder(
   tx: any,
   orderData: OrderData,
   orderAmounts: any,
-  expiresAt: Date
+  expiresAt: Date,
 ) {
   const [newOrder] = await tx
     .insert(order)
@@ -93,7 +93,7 @@ export function calculateLimitOrderAmount(orderData: OrderData) {
  */
 export function calculateMarketOrderAmount(
   orderData: OrderData,
-  slippageTolerance: Decimal = DEFAULT_SLIPPAGE_TOLERANCE
+  slippageTolerance: Decimal = DEFAULT_SLIPPAGE_TOLERANCE,
 ) {
   const quantity = new Decimal(orderData.quantity);
 

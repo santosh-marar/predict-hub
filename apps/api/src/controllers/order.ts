@@ -97,7 +97,7 @@ export const createOrder = asyncMiddleware(
         trades,
       },
     });
-  }
+  },
 );
 
 // Get user orders
@@ -155,7 +155,7 @@ export const getUserOrders = asyncMiddleware(
       success: true,
       data: orders,
     });
-  }
+  },
 );
 
 export async function getOrderBook(eventId: string): Promise<OrderBook> {
@@ -168,8 +168,8 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
         and(
           eq(order.eventId, eventId),
           eq(order.status, "pending"),
-          eq(order.orderType, "limit") // Only limit orders
-        )
+          eq(order.orderType, "limit"), // Only limit orders
+        ),
       )
       .orderBy(asc(order.createdAt));
 
@@ -187,7 +187,7 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
     // Limit order book entries
     const buildLimitOrderBookEntries = (
       orders: typeof activeOrders,
-      isAsk: boolean
+      isAsk: boolean,
     ) => {
       const priceMap = new Map<string, { quantity: string; orders: number }>();
 
@@ -232,11 +232,9 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
     const noAsks = buildLimitOrderBookEntries(noSellLimitOrders, true);
     const noBids = buildLimitOrderBookEntries(noBuyLimitOrders, false);
 
-
     const events = await db.select().from(event).where(eq(event.id, eventId));
-    const totalYesShares=events[0].totalYesShares;
-    const totalNoShares=events[0].totalNoShares;
-
+    const totalYesShares = events[0].totalYesShares;
+    const totalNoShares = events[0].totalNoShares;
 
     const result = {
       eventId,
@@ -262,4 +260,3 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
 // console.log("Final result:", result);
 // console.log("Final result no asks", result.raw.noAsks);
 // console.log("Final result yes asks", result.raw?.yesBids);
-

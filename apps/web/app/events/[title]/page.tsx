@@ -20,7 +20,7 @@ export default function SubCategoryEvents() {
 
   const getEvents = async () => {
     const response = await api.get(
-      `/event?subCategoryTitle=${subCategoryTitle}`
+      `/event?subCategoryTitle=${subCategoryTitle}`,
     );
     return response.data;
   };
@@ -60,7 +60,9 @@ export default function SubCategoryEvents() {
               Home
             </Link>
             <span className="mx-2">{">"}</span>
-            <span className="text-[#252525] font-medium capitalize">{subCategoryTitle}</span>
+            <span className="text-[#252525] font-medium capitalize">
+              {subCategoryTitle}
+            </span>
           </div>
 
           {/* Bitcoin Header */}
@@ -68,7 +70,9 @@ export default function SubCategoryEvents() {
             <div className="bg-[#F7931A] rounded-full p-3 mr-4 flex items-center justify-center h-10 w-10">
               <span className="text-white font-bold text-xl">₿</span>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 capitalize">{subCategoryTitle}</h1>
+            <h1 className="text-4xl font-bold text-gray-900 capitalize">
+              {subCategoryTitle}
+            </h1>
           </div>
 
           {/* Custom Tabs */}

@@ -118,13 +118,12 @@ export default function EventEditForm({ initialData }: EventEditFormProps) {
     const currentTags = form.getValues("tags");
     form.setValue(
       "tags",
-      currentTags.filter((tag) => tag !== tagToRemove)
+      currentTags.filter((tag) => tag !== tagToRemove),
     );
   };
 
   const mutation = useMutation({
     mutationFn: async (data: EventFormData) => {
-
       const response = await api.put(`/event/${data.id}`, data);
       return response.data;
     },

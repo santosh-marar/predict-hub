@@ -1,7 +1,14 @@
 import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { event } from "./event";
-import { uuid, text, timestamp, boolean, index, pgTable } from "drizzle-orm/pg-core";
+import {
+  uuid,
+  text,
+  timestamp,
+  boolean,
+  index,
+  pgTable,
+} from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -42,12 +49,12 @@ export const comment = pgTable(
     userIdx: index("comments_user_idx").on(table.userId),
     parentIdx: index("comments_parent_idx").on(table.parentId),
     createdAtIdx: index("comments_created_at_idx").on(table.createdAt),
-  })
+  }),
 );
 
 export const commentSelectSchema = createSelectSchema(comment);
-export const commentInsertSchema = createInsertSchema(comment); 
-export const commentUpdateSchema= createUpdateSchema(comment);
+export const commentInsertSchema = createInsertSchema(comment);
+export const commentUpdateSchema = createUpdateSchema(comment);
 
 export const commentRelation = relations(comment, ({ one, many }) => ({
   event: one(event, {
@@ -72,4 +79,3 @@ export const commentRelation = relations(comment, ({ one, many }) => ({
     relationName: "parentComment", // Match the parent relation name
   }),
 }));
-

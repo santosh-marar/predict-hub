@@ -19,12 +19,7 @@ export default function DownloadApp() {
           Download Now
         </Button>
       </div>
-      <Image
-        src="/download.avif"
-        alt="download app"
-        width={132}
-        height={132}
-      />
+      <Image src="/download.avif" alt="download app" width={132} height={132} />
     </div>
   );
 }

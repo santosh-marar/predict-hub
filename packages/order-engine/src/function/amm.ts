@@ -15,7 +15,7 @@ export async function executeAMMTrade(
   tx: any,
   newOrder: any,
   eventData: any,
-  remainingQuantity: any
+  remainingQuantity: any,
 ): Promise<TradeExecution | null> {
   // Get current AMM price based on side
   const currentPrice =
@@ -87,7 +87,7 @@ export async function executeAMMTrade(
       eventData.totalYesShares,
       eventData.totalNoShares,
       newOrder.side,
-      remainingQuantity
+      remainingQuantity,
     );
 
   // 5. Update event data
@@ -106,25 +106,25 @@ export async function executeAMMTrade(
     .update(order)
     .set({
       status: "filled",
-      filledQuantity: newOrder.originalQuantity, 
+      filledQuantity: newOrder.originalQuantity,
       averageFillPrice: parseFloat(
         (
           Number(ammTradeExecution.totalFees) /
           Number(newOrder.originalQuantity)
-        ).toFixed(4)
+        ).toFixed(4),
       ),
       fees: parseFloat(
         (
           Number(ammTradeExecution.totalFees) - Number(ammTradeExecution.amount)
-        ).toFixed(4)
+        ).toFixed(4),
       ),
-      totalFees: ammTradeExecution.totalFees, 
+      totalFees: ammTradeExecution.totalFees,
       filledAt: new Date(),
       remainingQuantity: 0,
     })
     .where(eq(order.id, newOrder.id));
 
-  // 7. Update taker wallet balance 
+  // 7. Update taker wallet balance
   await deductLockedFunds(tx, newOrder.userId, ammTradeExecution.totalFees);
 
   // 8. Unlock remaining funds
@@ -138,7 +138,7 @@ export function calculateNewPriceAfterTrade(
   currentYesShares: number,
   currentNoShares: number,
   tradeSide: string,
-  tradeQuantity: number
+  tradeQuantity: number,
 ) {
   const k = currentYesShares * currentNoShares;
 
@@ -156,7 +156,7 @@ export function calculateNewPriceAfterTrade(
   const totalShares = newYesShares + newNoShares;
   const newYesPrice = Math.max(
     0.5,
-    Math.min(9.5, (newNoShares / totalShares) * 10)
+    Math.min(9.5, (newNoShares / totalShares) * 10),
   );
   const newNoPrice = 10 - newYesPrice;
 

@@ -32,7 +32,7 @@ const queryTransactionSchema = z.object({
 export const getWallet = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const userId = req.user?.id!;
@@ -100,7 +100,7 @@ export const getWallet = async (
 export const deposit = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const validatedData = depositSchema.parse(req.body);
@@ -167,7 +167,7 @@ export const deposit = async (
 export const withdraw = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const validatedData = withdrawSchema.parse(req.body);
@@ -372,7 +372,7 @@ export const getWalletBalance = asyncMiddleware(
         availableBalance: availableBalance.toFixed(2),
       },
     });
-  }
+  },
 );
 
 // Update wallet balance (internal use)
@@ -380,7 +380,7 @@ export const updateWalletBalance = async (
   userId: string,
   amount: number,
   type: "add" | "subtract" | "lock" | "unlock",
-  tx?: any
+  tx?: any,
 ) => {
   try {
     const dbInstance = tx || db;
@@ -432,7 +432,7 @@ export const updateWalletBalance = async (
 // Create wallet for new user (internal use)
 export const createWallet = async (
   userId: string,
-  initialBalance: number = 10000
+  initialBalance: number = 10000,
 ) => {
   try {
     const newWallet = await db
