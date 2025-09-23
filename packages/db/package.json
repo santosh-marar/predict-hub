@@ -19,7 +19,8 @@
     "db:check": "drizzle-kit check",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:drop": "drizzle-kit drop"
+    "db:drop": "drizzle-kit drop",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
@@ -29,12 +30,14 @@
     "dotenv": "^16.6.1",
     "drizzle-orm": "^0.43.1",
     "drizzle-zod": "^0.7.1",
+    "pg": "^8.16.3",
     "postgres": "^3.4.7",
     "typescript": "^5.8.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20.19.7",
+    "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.4",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0"
