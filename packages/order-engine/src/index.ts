@@ -19,6 +19,7 @@ import Decimal from "decimal.js";
 import { sql, desc, eq, gt, gte, asc, lte, and } from "drizzle-orm";
 import { upsertUserPosition } from "./function/position";
 import { createTransactionRecords } from "./function/transaction";
+import { getMatchingOrdersArray, loadOrdersFromDatabase } from "./match-engine";
 
 /**
  * Main entry point for placing orders
@@ -41,18 +42,18 @@ export async function placeOrder(orderData: OrderData): Promise<any> {
         tx,
         orderData,
         orderAmounts,
-        eventData.endTime,
+        eventData.endTime
       );
     } else if (orderData.orderType === "market") {
       orderAmounts = calculateMarketOrderAmount(
         orderData,
-        DEFAULT_SLIPPAGE_TOLERANCE,
+        DEFAULT_SLIPPAGE_TOLERANCE
       );
       newOrder = await createMarketOrder(
         tx,
         orderData,
         orderAmounts,
-        eventData.endTime,
+        eventData.endTime
       );
     } else {
       throw new Error("Invalid order type. Must be 'limit' or 'market'");
@@ -65,8 +66,6 @@ export async function placeOrder(orderData: OrderData): Promise<any> {
     const trades = await matchOrder(tx, newOrder, eventData);
 
     return {
-      order: newOrder,
-      orderAmounts,
       trades,
     };
   });
@@ -78,20 +77,25 @@ export async function placeOrder(orderData: OrderData): Promise<any> {
 export async function matchOrder(
   tx: any,
   newOrder: any,
-  eventData: any,
+  eventData: any
 ): Promise<TradeExecution[]> {
+  await loadOrdersFromDatabase(tx, newOrder.eventId);
+
   const trades: TradeExecution[] = [];
   let remainingQuantity = new Decimal(newOrder.remainingQuantity);
 
-  // Step 1: Try to match against existing orders in the order book
-  const matchingOrders = await getMatchingOrders(tx, newOrder);
+  // Step 1: Get matching orders (no execution)
+  const matchingOrders = getMatchingOrdersArray(newOrder);
+
+  console.log("Matching orders:", matchingOrders);
+  console.log("Remaining quantity:", remainingQuantity);
 
   for (const matchingOrder of matchingOrders) {
     if (remainingQuantity.isZero()) break;
 
     const tradeQuantity = Decimal.min(
       remainingQuantity,
-      new Decimal(matchingOrder.remainingQuantity),
+      new Decimal(matchingOrder.remainingQuantity)
     );
 
     const tradePrice = determineTradePrice(newOrder, matchingOrder);
@@ -185,66 +189,19 @@ export async function matchOrder(
         tx,
         newOrder,
         eventData,
-        remainingQuantity,
+        remainingQuantity
       );
       if (ammTrade) {
         trades.push(ammTrade);
       }
     } else {
       console.warn(
-        `AMM does not have enough ${side === "yes" ? "no" : "yes"} shares to fulfill the remaining quantity for this ${side} ${newOrder.type} order.`,
+        `AMM does not have enough ${side === "yes" ? "no" : "yes"} shares to fulfill the remaining quantity for this ${side} ${newOrder.type} order.`
       );
     }
   }
 
   return trades;
-}
-
-/**
- * Get orders that can match with the new order
- */
-export async function getMatchingOrders(
-  tx: any,
-  newOrder: any,
-): Promise<OrderBookEntry[]> {
-  // Match same side (YES with YES, NO with NO) but opposite type (buy with sell)
-  const oppositeType = newOrder.type === "buy" ? "sell" : "buy";
-  const sameSide = newOrder.side;
-
-  let priceCondition: any;
-  let orderByClause: any;
-
-  if (newOrder.orderType === "market") {
-    // Market orders match at any price
-    priceCondition = sql`1=1`;
-    orderByClause =
-      newOrder.type === "buy" ? asc(order.limitPrice) : desc(order.limitPrice);
-  } else {
-    // Limit orders match based on price improvement
-    if (newOrder.type === "buy") {
-      priceCondition = lte(order.limitPrice, newOrder.limitPrice);
-      orderByClause = asc(order.limitPrice);
-    } else {
-      priceCondition = gte(order.limitPrice, newOrder.limitPrice);
-      orderByClause = desc(order.limitPrice);
-    }
-  }
-
-  return await tx
-    .select()
-    .from(order)
-    .where(
-      and(
-        eq(order.eventId, newOrder.eventId),
-        eq(order.side, sameSide),
-        eq(order.type, oppositeType),
-        eq(order.status, "pending"),
-        gt(order.remainingQuantity, "0"),
-        priceCondition,
-      ),
-    )
-    .orderBy(orderByClause, asc(order.createdAt))
-    .limit(50);
 }
 
 /**
