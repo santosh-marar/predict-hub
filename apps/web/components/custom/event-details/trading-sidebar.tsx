@@ -99,7 +99,7 @@ export default function TradingSidebar({ eventId }: TradingSidebarProps) {
       formData.orderType = "market";
     }
 
-    console.log("Form data being sent:", formData);
+    // console.log("Form data being sent:", formData);
     onSubmit(formData);
   };
 
@@ -124,7 +124,7 @@ export default function TradingSidebar({ eventId }: TradingSidebarProps) {
   });
 
   const onSubmit = (data: EventFormData) => {
-    console.log("data", data);
+    // console.log("data", data);
     mutation.mutate(data);
   };
 
