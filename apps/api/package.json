@@ -20,6 +20,7 @@
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@repo/logger": "workspace:*",
     "@repo/order-engine": "workspace:*",
     "@repo/types": "workspace:*",
     "better-auth": "^1.2.7",
@@ -31,7 +32,6 @@
     "rimraf": "^6.0.1",
     "slug": "^11.0.0",
     "socket.io": "^4.8.1",
-    "winston": "^3.17.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {
