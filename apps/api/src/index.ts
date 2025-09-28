@@ -7,6 +7,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { toNodeHandler } from "better-auth/node";
 import { createServer } from "http";
+import { initializeSocket } from "./service/socket-io";
 
 import adminRoutes from "./routes/admin";
 import { auth } from "./lib/auth";
@@ -16,7 +17,7 @@ import subCategoryRoutes from "./routes/sub-category";
 import eventRoutes from "./routes/event";
 import orderRoute from "./routes/order";
 import walletRoute from "./routes/wallet";
-import { initializeSocket } from "./service/socket-io";
+import positionRoute from "./routes/position";
 
 const app: Application = express();
 const PORT = process.env.PORT || 8080;
@@ -76,6 +77,7 @@ app.use("/api/v1/sub-category", subCategoryRoutes);
 app.use("/api/v1/event", eventRoutes);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/wallet", walletRoute);
+app.use("/api/v1/position", positionRoute);
 
 // Start server
 httpServer.listen(PORT, () => {
