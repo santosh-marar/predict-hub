@@ -106,9 +106,9 @@ export function addOrderToBook(order: Order): void {
 
   orderLookup.set(order.id, order);
 
-  console.log(
-    `📝 Added to book: ${order.type} ${order.quantity} ${order.side} @ $${order.limitPrice}`
-  );
+  // console.log(
+  //   `Added to book: ${order.type} ${order.side} @ $${order.limitPrice}`
+  // );
 }
 
 // Remove order from book
@@ -261,9 +261,9 @@ export function findPriceTriggeredMatches(
     }
   }
 
-  if (triggeredMatches.length > 0) {
-    console.log(`⚡ Found ${triggeredMatches.length} price-triggered matches`);
-  }
+  // if (triggeredMatches.length > 0) {
+  //   console.log(` Found ${triggeredMatches.length} price-triggered matches`);
+  // }
 
   return triggeredMatches;
 }

@@ -25,6 +25,8 @@ export async function createTransactionRecords(
     makerFees: makerFee.toString(),
     totalFees: tradeExecution.totalFees.toString(),
     status: "COMPLETED",
+    balanceBefore: tradeExecution.balanceBefore,
+    balanceAfter: tradeExecution.balanceAfter,
     createdAt: new Date(),
     completedAt: new Date(),
   });
@@ -40,6 +42,8 @@ export async function createTransactionRecords(
     takerFees: tradeExecution.takerFee,
     totalFees: tradeExecution.totalFees,
     status: "COMPLETED",
+    balanceBefore: tradeExecution.balanceBefore,
+    balanceAfter: tradeExecution.balanceAfter,
     createdAt: new Date(),
     completedAt: new Date(),
   });

@@ -1,5 +1,5 @@
-import { db, order, wallet } from "@repo/db";
-import { lockUserFunds, validateUserBalance } from "./function/fund";
+import { db, event, order, wallet } from "@repo/db";
+import { creditUserBalance, deductLockedFunds, lockUserFunds, unlockUserFunds, validateUserBalance } from "./function/fund";
 import {
   TAKER_FEE_RATE,
   DEFAULT_SLIPPAGE_TOLERANCE,
@@ -13,7 +13,7 @@ import {
   createMarketOrder,
 } from "./function/order";
 import { insertTradeRecord } from "./function/trade";
-import { executeAMMTrade } from "./function/amm";
+import { calculateNewPriceAfterTrade, executeAMMTrade } from "./function/amm";
 import { OrderBookEntry, OrderData, TradeExecution } from "./types";
 import Decimal from "decimal.js";
 import { sql, desc, eq, gt, gte, asc, lte, and } from "drizzle-orm";
@@ -87,9 +87,6 @@ export async function matchOrder(
   // Step 1: Get matching orders (no execution)
   const matchingOrders = getMatchingOrdersArray(newOrder);
 
-  console.log("Matching orders:", matchingOrders);
-  console.log("Remaining quantity:", remainingQuantity);
-
   for (const matchingOrder of matchingOrders) {
     if (remainingQuantity.isZero()) break;
 
@@ -104,6 +101,9 @@ export async function matchOrder(
     // Calculate fees
     const makerFee = tradeAmount.mul(MAKER_FEE_RATE);
     const takerFee = tradeAmount.mul(TAKER_FEE_RATE);
+
+    // Get user credit balance after selling stock
+    const takerShareSell= tradeAmount.sub(makerFee)
 
     // Get wallet balances BEFORE trade
     const [makerWallet] = await tx
@@ -160,9 +160,57 @@ export async function matchOrder(
     // 4. Insert transaction record
     await createTransactionRecords(tx, newOrder, matchingOrder, tradeExecution);
 
-    // Todo: Update both parties user wallet
+    // 4. Calculate new AMM price after trade
+      const { newYesPrice, newNoPrice, newYesShares, newNoShares } =
+        calculateNewPriceAfterTrade(
+          eventData.totalYesShares,
+          eventData.totalNoShares,
+          newOrder.side,
+          Number(remainingQuantity)
+        );
+    
+      // 5. Update event data
+      await tx
+        .update(event)
+        .set({
+          totalYesShares: newYesShares,
+          totalNoShares: newNoShares,
+          lastYesPrice: newYesPrice,
+          lastNoPrice: newNoPrice,
+        })
+        .where(eq(event.id, eventData.id));
+    
+      // 6. Update order status
+      await tx
+        .update(order)
+        .set({
+          status: "filled",
+          filledQuantity: newOrder.originalQuantity,
+          averageFillPrice: parseFloat(
+            (
+              Number(tradeExecution.totalFees) /
+              Number(newOrder.originalQuantity)
+            ).toFixed(4),
+          ),
+          fees: parseFloat(
+            (
+              Number(tradeExecution.totalFees) - Number(tradeExecution.amount)
+            ).toFixed(4),
+          ),
+          totalFees: tradeExecution.totalFees,
+          filledAt: new Date(),
+          remainingQuantity: 0,
+        })
+        .where(eq(order.id, newOrder.id));
+    
+      // 7. Update taker wallet balance
+      await deductLockedFunds(tx, newOrder.userId, tradeExecution.totalFees);
 
-    // Todo: Update order fill status & remaining quantity and status & filled quantity & average fill price & fees & total fees  & filled at
+      // 8. Credit user balance
+      await creditUserBalance(tx, newOrder.userId, takerShareSell);
+    
+      // 8. Unlock remaining funds
+      await unlockUserFunds(tx, newOrder.userId, tradeExecution.totalFees);
 
     trades.push(tradeExecution);
     remainingQuantity = remainingQuantity.sub(tradeQuantity);
@@ -170,34 +218,36 @@ export async function matchOrder(
 
   // Step 2: Fallback to AMM if remaining quantity exists
   if (remainingQuantity.gt(0)) {
-    const ammYesShares = new Decimal(eventData.totalYesShares);
-    const ammNoShares = new Decimal(eventData.totalNoShares);
-
-    const isBuy = newOrder.type === "buy";
-    const side = newOrder.side;
-
-    const ammHasEnoughLiquidity = (() => {
-      if (side === "yes" && isBuy) return ammNoShares.gte(remainingQuantity);
-      if (side === "no" && isBuy) return ammYesShares.gte(remainingQuantity);
-      if (side === "yes" && !isBuy) return true; // selling "yes" to AMM always allowed
-      if (side === "no" && !isBuy) return true; // selling "no" to AMM always allowed
-      return false;
-    })();
-
-    if (ammHasEnoughLiquidity) {
-      const ammTrade = await executeAMMTrade(
-        tx,
-        newOrder,
-        eventData,
-        remainingQuantity
-      );
-      if (ammTrade) {
-        trades.push(ammTrade);
-      }
+    if (newOrder.type === "sell") {
+      // Do nothing: sells should not be routed to the AMM
     } else {
-      console.warn(
-        `AMM does not have enough ${side === "yes" ? "no" : "yes"} shares to fulfill the remaining quantity for this ${side} ${newOrder.type} order.`
-      );
+      const ammYesShares = new Decimal(eventData.totalYesShares);
+      const ammNoShares = new Decimal(eventData.totalNoShares);
+
+      const isBuy = newOrder.type === "buy";
+      const side = newOrder.side;
+
+      const ammHasEnoughLiquidity = (() => {
+        if (side === "yes" && isBuy) return ammNoShares.gte(remainingQuantity);
+        if (side === "no" && isBuy) return ammYesShares.gte(remainingQuantity);
+        return false; // no AMM trades for sells
+      })();
+
+      if (ammHasEnoughLiquidity) {
+        const ammTrade = await executeAMMTrade(
+          tx,
+          newOrder,
+          eventData,
+          remainingQuantity
+        );
+        if (ammTrade) {
+          trades.push(ammTrade);
+        }
+      } else {
+        console.warn(
+          `AMM does not have enough ${side === "yes" ? "no" : "yes"} shares to fulfill the remaining quantity for this ${side} buy order.`
+        );
+      }
     }
   }
 

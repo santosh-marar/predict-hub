@@ -18,7 +18,6 @@ export async function upsertUserPosition(
         eq(position.userId, positionData.takerUserId),
         eq(position.eventId, positionData.eventId),
         eq(position.side, positionData.side),
-        eq(position.type, positionData.type),
       ),
     )
     .limit(1);

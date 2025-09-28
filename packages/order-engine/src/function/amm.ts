@@ -32,6 +32,7 @@ export async function executeAMMTrade(
     if (newOrder.type === "buy" && ammPrice.gt(limitPrice)) {
       return null;
     }
+
     if (newOrder.type === "sell" && ammPrice.lt(limitPrice)) {
       return null;
     }
