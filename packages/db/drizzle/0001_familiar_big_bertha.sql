@@ -1,0 +1,1 @@
+ALTER TABLE "position" ADD COLUMN "status" text DEFAULT 'open' NOT NULL;

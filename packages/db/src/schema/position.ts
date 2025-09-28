@@ -33,6 +33,10 @@ export const position = pgTable(
       .default("0")
       .notNull(),
 
+    status: text("status", { enum: ["open", "closed"] })
+      .default("open")
+      .notNull(),
+
     // Cost tracking
     totalInvested: decimal("total_invested", { precision: 15, scale: 5 })
       .default("0")
@@ -53,11 +57,11 @@ export const position = pgTable(
   (table) => ({
     userEventIdx: index("positions_user_event_idx").on(
       table.userId,
-      table.eventId,
+      table.eventId
     ),
     userIdx: index("positions_user_idx").on(table.userId),
     eventIdx: index("positions_event_idx").on(table.eventId),
-  }),
+  })
 );
 
 export const positionSelectSchema = createSelectSchema(position);
