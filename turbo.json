@@ -8,13 +8,17 @@
       ],
       "inputs": [
         "src/**",
+        "lib/**",
+        "components/**",
         "tsconfig.json",
+        "package.json",
         ".env*"
       ],
       "outputs": [
         "dist/**",
         ".next/**",
-        "!.next/cache/**"
+        "!.next/cache/**",
+        "build/**"
       ]
     },
     "dev": {
@@ -33,16 +37,35 @@
     },
     "lint": {
       "dependsOn": [
-        "^lint"
+        "^build"
+      ],
+      "inputs": [
+        "src/**",
+        "lib/**",
+        "components/**",
+        ".eslintrc*",
+        "eslint.config.*"
       ]
     },
     "check-types": {
       "dependsOn": [
-        "^check-types"
+        "^build"
+      ],
+      "inputs": [
+        "src/**",
+        "lib/**",
+        "components/**",
+        "tsconfig.json"
       ]
     },
     "clean": {
-      "cache": false
+      "cache": false,
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "build/**",
+        "node_modules/.cache/**"
+      ]
     },
     "db:check": {
       "cache": false,
@@ -54,13 +77,23 @@
       "cache": false,
       "dependsOn": [
         "^db:generate"
+      ],
+      "outputs": [
+        "generated/**",
+        "prisma/generated/**"
       ]
     },
     "db:migrate": {
       "cache": false,
       "dependsOn": [
-        "^db:migrate"
+        "^db:migrate",
+        "db:generate"
       ]
     }
-  }
+  },
+  "globalDependencies": [
+    "package.json",
+    "turbo.json",
+    ".env*"
+  ]
 }
