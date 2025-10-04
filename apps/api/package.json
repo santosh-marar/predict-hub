@@ -23,6 +23,7 @@
     "@repo/logger": "workspace:*",
     "@repo/order-engine": "workspace:*",
     "@repo/types": "workspace:*",
+    "@predict-hub/kafka": "workspace:*",
     "better-auth": "^1.2.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

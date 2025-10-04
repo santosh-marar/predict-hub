@@ -2,8 +2,8 @@ import { Router } from "express";
 import { getUserPosition } from "../controllers/position";
 import { isAuthenticated } from "src/middleware/auth";
 
-export const positionRouter = Router();
+const positionRouter: Router = Router();
 
-positionRouter.get("/", isAuthenticated,  getUserPosition);
+positionRouter.get("/", isAuthenticated, getUserPosition);
 
 export default positionRouter;

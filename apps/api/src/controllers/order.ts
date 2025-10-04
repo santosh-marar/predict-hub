@@ -1,161 +1,129 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { db, order, event } from "@repo/db";
 import { eq, desc, and, asc, or } from "drizzle-orm";
-import { z } from "zod";
 import { AuthRequest } from "src/middleware/auth";
 import asyncMiddleware from "src/middleware/async-middleware";
-import { placeOrder } from "@repo/order-engine";
 import { handleOrderBookChange } from "src/service/socket-io";
 import { logger } from "src/utils/logger";
+import { KAFKA_TOPICS, sendToKafka } from "@predict-hub/kafka";
+import { OrderBook } from "src/types/order-book";
+import { createOrderSchema, queryOrderSchema } from "src/validation/order";
 
-// Types for order book
-export interface OrderBookEntry {
-  price: string;
-  quantity: string;
-  orders: number;
-  side: "yes" | "no";
-  type: "limit" | "amm" | "market";
-}
-// Order book types
-export interface OrderBook {
-  eventId: string;
-  yesAsks: OrderBookEntry[];
-  yesBids: OrderBookEntry[];
-  noAsks: OrderBookEntry[];
-  noBids: OrderBookEntry[];
-  totalYesShares: string;
-  totalNoShares: string;
-  lastYesPrice?: string;
-  lastNoPrice?: string;
-}
+export const createOrder = asyncMiddleware(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
 
-// Validation schemas
-const createOrderSchema = z.object({
-  eventId: z.string().uuid(),
-  side: z.enum(["yes", "no"]),
-  type: z.enum(["buy", "sell"]),
-  orderType: z.enum(["market", "limit"]).default("market"),
-  quantity: z.number().positive(),
-  price: z.number().min(0.5).max(9.5).optional(),
-  limitPrice: z.number().min(0.5).max(9.5).optional(),
-});
+    if (!userId) {
+      logger.warn(
+        { context: "CREATE_ORDER_UNAUTHORIZED", userId },
+        "Unauthorized request to create order"
+      );
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
-const queryOrderSchema = z.object({
-  page: z.string().transform(Number).default("1"),
-  limit: z.string().transform(Number).default("20"),
-  eventId: z.string().uuid().optional(),
-  status: z
-    .enum(["pending", "partial", "filled", "cancelled", "expired"])
-    .optional(),
-  side: z.enum(["yes", "no"]).optional(),
-  type: z.enum(["buy", "sell"]).optional(),
-});
+    let validatedData;
+    try {
+      validatedData = createOrderSchema.parse(req.body);
+      logger.debug(
+        { context: "CREATE_ORDER_VALIDATION", userId, body: req.body },
+        "Validated order input"
+      );
+    } catch (error) {
+      logger.error(
+        {
+          alert: true,
+          context: "CREATE_ORDER_VALIDATION_FAIL",
+          userId,
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+        "Order validation failed"
+      );
+      return res.status(400).json({ error: "Invalid order data" });
+    }
 
-export const createOrder = asyncMiddleware(async (req: AuthRequest, res: Response) => {
-  const userId = req.user?.id;
+    // Validate market orders don't have limit price
+    if (validatedData.orderType === "market" && validatedData.limitPrice) {
+      logger.warn(
+        {
+          context: "CREATE_ORDER_INVALID_MARKET",
+          userId,
+          orderType: validatedData.orderType,
+          limitPrice: validatedData.limitPrice,
+        },
+        "Market orders cannot have limit price"
+      );
+      return res
+        .status(400)
+        .json({ error: "Market orders cannot have limit price" });
+    }
 
-  if (!userId) {
-    logger.warn(
-      { context: "CREATE_ORDER_UNAUTHORIZED", userId },
-      "Unauthorized request to create order"
-    );
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+    // Validate limit orders have limit price
+    if (validatedData.orderType === "limit" && !validatedData.limitPrice) {
+      logger.warn(
+        {
+          context: "CREATE_ORDER_INVALID_LIMIT",
+          userId,
+          orderType: validatedData.orderType,
+        },
+        "Limit orders must have limit price"
+      );
+      return res
+        .status(400)
+        .json({ error: "Limit orders must have limit price" });
+    }
 
-  let validatedData;
-  try {
-    validatedData = createOrderSchema.parse(req.body);
-    logger.debug(
-      { context: "CREATE_ORDER_VALIDATION", userId, body: req.body },
-      "Validated order input"
-    );
-  } catch (error) {
-    logger.error(
-      {
-        alert: true,
-        context: "CREATE_ORDER_VALIDATION_FAIL",
-        userId,
-        error: error instanceof Error ? error.message : error,
-        stack: error instanceof Error ? error.stack : undefined,
-      },
-      "Order validation failed"
-    );
-    return res.status(400).json({ error: "Invalid order data" });
-  }
+    try {
+      const totalQuantity = String(validatedData.quantity);
+      const limitPrice = validatedData.limitPrice;
+      const price = Number(validatedData.price);
 
-  // Validate market orders don't have limit price
-  if (validatedData.orderType === "market" && validatedData.limitPrice) {
-    logger.warn(
-      {
-        context: "CREATE_ORDER_INVALID_MARKET",
-        userId,
-        orderType: validatedData.orderType,
-        limitPrice: validatedData.limitPrice,
-      },
-      "Market orders cannot have limit price"
-    );
-    return res
-      .status(400)
-      .json({ error: "Market orders cannot have limit price" });
-  }
-
-  // Validate limit orders have limit price
-  if (validatedData.orderType === "limit" && !validatedData.limitPrice) {
-    logger.warn(
-      {
-        context: "CREATE_ORDER_INVALID_LIMIT",
-        userId,
-        orderType: validatedData.orderType,
-      },
-      "Limit orders must have limit price"
-    );
-    return res
-      .status(400)
-      .json({ error: "Limit orders must have limit price" });
-  }
-
-  try {
-    const totalQuantity = String(validatedData.quantity);
-    const limitPrice = validatedData.limitPrice;
-    const price = Number(validatedData.price);
-
-    const trades = await placeOrder({
-      userId,
-      eventId: validatedData.eventId,
-      side: validatedData.side,
-      type: validatedData.type,
-      orderType: validatedData.orderType,
-      quantity: totalQuantity,
-      limitPrice,
-      price,
-    });
-
-    await handleOrderBookChange(validatedData.eventId);
-
-    logger.info(
-      {
-        context: "CREATE_ORDER_SUCCESS",
+      const order = {
         userId,
         eventId: validatedData.eventId,
-      },
-      "Order successfully created"
-    );
+        side: validatedData.side,
+        type: validatedData.type,
+        orderType: validatedData.orderType,
+        quantity: totalQuantity,
+        limitPrice,
+        price,
+      };
 
-    res.status(201).json({ success: true, data: { trades } });
-  } catch (error) {
-    logger.error(
-      {
-        alert: true,
-        context: "CREATE_ORDER_FAIL",
-        userId,
-        error: error instanceof Error ? error.message : error,
-        stack: error instanceof Error ? error.stack : undefined,
-      },
-      "Failed to create order"
-    );
-    res.status(500).json({ error: "Failed to create order" });
+      await sendToKafka(
+        KAFKA_TOPICS.ORDER_PLACED,
+        order,
+        validatedData.eventId // Key for partitioning
+      );
+
+      logger.info(
+        {
+          context: "ORDER_PLACED_SUCCESSFULLY",
+          userId,
+          eventId: validatedData.eventId,
+        },
+        "Order placed successfully"
+      );
+
+      await handleOrderBookChange(validatedData.eventId);
+
+      res
+        .status(201)
+        .json({ success: true, message: "Your order placed successfully" });
+    } catch (error) {
+      logger.error(
+        {
+          alert: true,
+          context: "CREATE_ORDER_FAIL",
+          userId,
+          error: error instanceof Error ? error.message : error,
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+        "Failed to create order"
+      );
+      res.status(500).json({ error: "Failed to create order" });
+    }
   }
-});
+);
 
 // Get user orders
 export const getUserOrders = asyncMiddleware(
@@ -212,7 +180,7 @@ export const getUserOrders = asyncMiddleware(
       success: true,
       data: orders,
     });
-  },
+  }
 );
 
 export async function getOrderBook(eventId: string): Promise<OrderBook> {
@@ -225,8 +193,8 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
         and(
           eq(order.eventId, eventId),
           eq(order.status, "pending"),
-          eq(order.orderType, "limit"), // Only limit orders
-        ),
+          eq(order.orderType, "limit") // Only limit orders
+        )
       )
       .orderBy(asc(order.createdAt));
 
@@ -244,7 +212,7 @@ export async function getOrderBook(eventId: string): Promise<OrderBook> {
     // Limit order book entries
     const buildLimitOrderBookEntries = (
       orders: typeof activeOrders,
-      isAsk: boolean,
+      isAsk: boolean
     ) => {
       const priceMap = new Map<string, { quantity: string; orders: number }>();
 
