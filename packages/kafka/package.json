@@ -1,0 +1,34 @@
+{
+  "name": "@predict-hub/kafka",
+  "version": "1.0.0",
+  "description": "kafka consumer and producer",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "kafka",
+    "topics",
+    "consumer",
+    "producer",
+    "probo-clone",
+    "probo",
+    "predict-hub"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.4.1",
+  "dependencies": {
+    "kafkajs": "^2.2.4",
+    "@repo/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "kafkajs": "^2.2.4"
+  }
+}
