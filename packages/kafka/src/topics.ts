@@ -1,5 +1,6 @@
 export const KAFKA_TOPICS = {
   ORDER_PLACED: "order.placed",
+  ORDER_CREATED: "order.created",
   ORDER_MATCHED: "order.matched",
   TRADE_EXECUTED: "trade.executed",
   SETTLEMENT_COMPLETED: "settlement.completed",

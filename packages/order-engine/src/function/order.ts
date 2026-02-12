@@ -15,6 +15,7 @@ export async function createLimitOrder(
   const [newOrder] = await tx
     .insert(order)
     .values({
+      id: orderData.id,
       userId: orderData.userId,
       eventId: orderData.eventId,
       side: orderData.side,
@@ -28,6 +29,7 @@ export async function createLimitOrder(
       totalAmount: orderAmounts.totalAmount,
       expiresAt,
     })
+    .onConflictDoNothing({ target: order.id })
     .returning();
 
   return newOrder;
@@ -45,6 +47,7 @@ export async function createMarketOrder(
   const [newOrder] = await tx
     .insert(order)
     .values({
+      id: orderData.id,
       userId: orderData.userId,
       eventId: orderData.eventId,
       side: orderData.side,
@@ -58,6 +61,7 @@ export async function createMarketOrder(
       slippageTolerance: DEFAULT_SLIPPAGE_TOLERANCE.toString(),
       expiresAt,
     })
+    .onConflictDoNothing({ target: order.id })
     .returning();
 
   return newOrder;

@@ -84,10 +84,8 @@ app.use("/api/v1/position", positionRoute);
 //  Start server
 async function startServer() {
   try {
-    logger.info(" Initializing services...");
-
     await initKafkaProducer(config.kafkaBrokers, "probo-api-service");
-    logger.info({ brokers: config.kafkaBrokers }, " Kafka connected");
+    logger.info({ brokers: config.kafkaBrokers }, "Kafka connected");
 
     httpServer.listen(config.port, () => {
       logger.info(`Server running at http://localhost:${config.port}`);

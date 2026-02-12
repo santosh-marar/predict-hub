@@ -7,8 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
+    "dev": "turbo dev",
+    "build": "turbo build",
     "dev:api": "turbo run dev --filter=api...",
     "dev:packages": "turbo run dev --filter=@repo/order-engine --filter=@repo/db --parallel",
     "build:watch": "turbo run build:watch --parallel",

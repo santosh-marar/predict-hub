@@ -45,11 +45,20 @@ export async function createKafkaConsumer(
   });
 
   await consumer.run({
-    autoCommit: true,
-    autoCommitInterval: 5000,
+    autoCommit: false,
     eachMessage: async (payload: EachMessagePayload) => {
       try {
         await handler(payload);
+
+        // Manual commit after successful processing to avoid losing messages on errors
+        await consumer.commitOffsets([
+          {
+            topic: payload.topic,
+            partition: payload.partition,
+            offset: (BigInt(payload.message.offset) + 1n).toString(),
+          },
+        ]);
+
         logger.info(
           {
             context: "KAFKA_CONSUMER_MESSAGE_PROCESSED",
@@ -69,7 +78,8 @@ export async function createKafkaConsumer(
           },
           "Kafka Consumer message error"
         );
-        // * Todo: Handle retry logic then throw error
+        // Let Kafka re-deliver by not committing the offset
+        throw error;
       }
     },
   });

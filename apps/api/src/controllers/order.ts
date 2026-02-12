@@ -1,4 +1,5 @@
 import { Response, NextFunction } from "express";
+import { randomUUID } from "crypto";
 import { db, order, event } from "@repo/db";
 import { eq, desc, and, asc, or } from "drizzle-orm";
 import { AuthRequest } from "src/middleware/auth";
@@ -74,11 +75,13 @@ export const createOrder = asyncMiddleware(
     }
 
     try {
+      const orderId = randomUUID();
       const totalQuantity = String(validatedData.quantity);
       const limitPrice = validatedData.limitPrice;
       const price = Number(validatedData.price);
 
       const order = {
+        id: orderId,
         userId,
         eventId: validatedData.eventId,
         side: validatedData.side,

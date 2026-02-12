@@ -36,6 +36,7 @@ export interface OrderBookEntry {
 }
 
 export interface OrderData {
+  id?: string;
   userId: string;
   eventId: string;
   side: "yes" | "no";
@@ -62,4 +63,24 @@ export interface PositionParams {
   quantity: Decimal;
   costBasis: Decimal;
   averagePrice: string;
+}
+export interface Order {
+  id: string;
+  eventId: string;
+  userId: string;
+  side: "yes" | "no";
+  type: "buy" | "sell";
+  orderType: "limit" | "market";
+  limitPrice: number;
+  quantity: number;
+  remainingQuantity: number;
+  createdAt: Date;
+  status: "pending" | "filled" | "cancelled";
+}
+
+export interface OrderMatch {
+  makerOrder: Order;
+  takerOrder: Order;
+  matchPrice: number;
+  matchQuantity: number;
 }

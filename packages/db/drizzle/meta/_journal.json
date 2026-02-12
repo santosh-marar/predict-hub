@@ -15,6 +15,13 @@
       "when": 1759061643823,
       "tag": "0001_familiar_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770826606109,
+      "tag": "0002_first_mongu",
+      "breakpoints": true
     }
   ]
 }

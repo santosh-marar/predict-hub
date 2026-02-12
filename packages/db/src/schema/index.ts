@@ -9,3 +9,4 @@ export * from "./trade";
 export * from "./transactions";
 export * from "./wallet";
 export * from "./amm";
+export * from "./outbox";

@@ -65,6 +65,7 @@ export async function sendToKafka(
 
   await producer.send({
     topic,
+    acks: -1,
     messages: [
       {
         key: key || null,
@@ -94,6 +95,7 @@ export async function sendBatchToKafka(
 
   await producer.send({
     topic,
+    acks: -1,
     messages: messages.map((msg) => ({
       key: msg.key || null,
       value: JSON.stringify(msg.value),

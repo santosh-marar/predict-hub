@@ -1,58 +1,6 @@
-import { sql, and, eq, gt, gte, lte, asc, desc } from "drizzle-orm";
-import { Decimal } from "decimal.js";
+import { sql, and, eq, gt } from "drizzle-orm";
 import { order } from "@repo/db";
-
-// ==========================================
-// TYPES & INTERFACES
-// ==========================================
-
-interface Order {
-  id: string;
-  eventId: string;
-  userId: string;
-  side: "yes" | "no";
-  type: "buy" | "sell";
-  orderType: "limit" | "market";
-  limitPrice: number;
-  quantity: number;
-  remainingQuantity: number;
-  createdAt: Date;
-  status: "pending" | "filled" | "cancelled";
-}
-
-interface PriceUpdate {
-  eventId: string;
-  side: "yes" | "no";
-  newPrice: number;
-  timestamp: Date;
-}
-
-interface OrderMatch {
-  makerOrder: Order;
-  takerOrder: Order;
-  matchPrice: number;
-  matchQuantity: number;
-}
-
-interface TradeExecution {
-  makerUserId: string;
-  takerUserId: string;
-  makerOrderId: string;
-  takerOrderId: string;
-  eventId: string;
-  side: "yes" | "no";
-  type: "buy" | "sell";
-  quantity: number;
-  price: number;
-  amount: Decimal;
-  makerFee: Decimal;
-  takerFee: Decimal;
-  totalFees: Decimal;
-  tradeType: "ORDER_BOOK" | "AMM";
-  executedAt: Date;
-  balanceAfter: Decimal;
-  balanceBefore: Decimal;
-}
+import { Order, OrderMatch } from "./types";
 
 // 1. Order book management (Storage Only)
 let orderBook: {

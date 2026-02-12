@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import pino from "pino";
+import pino, { type Logger } from "pino";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-export const createLogger = (serviceName: string) => {
+export const createLogger = (serviceName: string): Logger => {
   const transport = isDev
     ? {
         target: "pino-pretty",
@@ -27,3 +27,5 @@ export const createLogger = (serviceName: string) => {
     pino.destination(1)
   );
 };
+
+export type { Logger };
