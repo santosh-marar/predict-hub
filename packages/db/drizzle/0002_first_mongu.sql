@@ -1,3 +1,8 @@
+DO $$ BEGIN
+	CREATE TYPE "outbox_status" AS ENUM('pending', 'published', 'failed');
+EXCEPTION
+	WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 CREATE TABLE "outbox_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"topic" text NOT NULL,
