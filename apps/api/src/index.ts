@@ -10,11 +10,10 @@ import { createServer } from "http";
 import { initializeSocket } from "./service/socket-io";
 import { auth } from "./lib/auth";
 
-
 import { initKafkaProducer, disconnectProducer } from "@predict-hub/kafka";
 
 const config = {
-  port: Number(process.env.PORT) || 8080,
+  port: Number(process.env.PORT) || 3000,
   kafkaBrokers: process.env.KAFKA_BROKERS?.split(",") ?? ["localhost:9092"],
 };
 
@@ -44,6 +43,8 @@ app.get("/health", (req, res) => {
     status: "ok",
     timestamp: new Date().toISOString(),
     socketConnections: io.engine.clientsCount,
+    release: process.env.ENOPS_RELEASE_ID ?? null,
+    commit: process.env.ENOPS_COMMIT_SHA ?? null,
   });
 });
 
@@ -83,20 +84,24 @@ app.use("/api/v1/position", positionRoute);
 
 //  Start server
 async function startServer() {
+  // Start HTTP server first so /health is always reachable
+  await new Promise<void>((resolve) => {
+    httpServer.listen(config.port, "0.0.0.0", () => {
+      logger.info(`Server running at http://localhost:${config.port}`);
+      resolve();
+    });
+  });
+
+  // Connect to Kafka after HTTP server is up (non-blocking for health)
   try {
     await initKafkaProducer(config.kafkaBrokers, "probo-api-service");
     logger.info({ brokers: config.kafkaBrokers }, "Kafka connected");
-
-    httpServer.listen(config.port, () => {
-      logger.info(`Server running at http://localhost:${config.port}`);
-      logger.info("Socket.IO ready | Kafka & Redis initialized");
-    });
+    logger.info("Socket.IO ready | Kafka initialized");
   } catch (error) {
     logger.error(
       { error },
-      " Failed to start server. Ensure Kafka & Redis are running."
+      "Failed to connect to Kafka. Server continues without Kafka."
     );
-    process.exit(1);
   }
 }
 

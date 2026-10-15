@@ -85,6 +85,9 @@
     },
     "db:migrate": {
       "cache": false,
+      "env": [
+        "DATABASE_URL"
+      ],
       "dependsOn": [
         "^db:migrate",
         "db:generate"
