@@ -10,7 +10,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-const outboxStatus = pgEnum("outbox_status", [
+export const outboxStatus = pgEnum("outbox_status", [
   "pending",
   "published",
   "failed",
