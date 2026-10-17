@@ -22,6 +22,27 @@
       "when": 1770826606109,
       "tag": "0002_first_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791917308801,
+      "tag": "0003_wonderful_fallen_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791918420867,
+      "tag": "0004_dazzling_sunfire",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791953331158,
+      "tag": "0005_elite_eddie_brock",
+      "breakpoints": true
     }
   ]
 }

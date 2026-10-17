@@ -3,6 +3,7 @@ import {
   uuid,
   text,
   serial,
+  integer,
   timestamp,
   boolean,
 } from "drizzle-orm/pg-core";
@@ -20,6 +21,8 @@ export const category = pgTable("category", {
   slug: text("slug").unique().notNull(),
   description: text("description"),
   imageUrl: text("image_url"),
+  sortOrder: integer("sort_order"),
+  icon: text("icon"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
