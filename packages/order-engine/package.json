@@ -15,6 +15,7 @@
         "build:watch": "tsup --watch",
         "dev": "tsup --watch",
         "typecheck": "tsc --noEmit",
+        "test": "node --test test/*.test.mjs",
         "clean": "rimraf dist",
         "start": "node dist/index.mjs"
     },
@@ -31,7 +32,7 @@
         "kafkajs": "^2.2.4",
         "postgres": "^3.4.7",
         "typescript": "^5.8.3",
-        "uuid": "^11.1.0"
+        "uuid": "^11.1.1"
     },
     "devDependencies": {
         "@types/node": "^24.6.2",
